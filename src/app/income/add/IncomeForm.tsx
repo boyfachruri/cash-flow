@@ -28,24 +28,24 @@ import NumberTextField from "@/components/NumberTextField";
 import { dummyData, dummyDataDetails } from "../data";
 import { useRouter } from "next/navigation";
 
-interface ExpensesFormInterface {
+interface IncomeFormInterface {
   id?: string;
   mode?: string;
 }
 
 interface CashOutInterface {
   id?: string;
-  expenseId?: string;
+  incomeId?: string;
   desc: string;
   amount: number;
 }
 
-const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
+const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
   const router = useRouter();  
  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
   const [valueTitle, setValueTitle] = useState<string>("");
   const [valueDesc, setValueDesc] = useState<string>("");
-  const [valueExpensesAmount, setValueExpensesAmount] =
+  const [valueIncomeAmount, setValueIncomeAmount] =
     useState<string>("0,00");
   const [valueAmount, setValueAmount] = useState<number>(0);
   const [menuAnchor, setMenuAnchor] = useState<{
@@ -62,8 +62,8 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
   }
 
-  const [cashout, setCashout] = useState<CashOutInterface>();
-  const [allCashout, setAllCashout] = useState<CashOutInterface[]>([]);
+  const [cashin, setCashin] = useState<CashOutInterface>();
+  const [allCashin, setAllCashin] = useState<CashOutInterface[]>([]);
 
   const formatNumberToIDR = (num: number): string => {
     return new Intl.NumberFormat("id-ID", {
@@ -72,16 +72,16 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
     }).format(num);
   };
 
-  const calculateTotalCashout = (data: CashOutInterface[]) => {
-    const totalAmount = data.reduce((total, cashout) => {
-      return total + (cashout.amount || 0); // Pastikan cashout.amount ada, jika tidak default ke 0
+  const calculateTotalCashin = (data: CashOutInterface[]) => {
+    const totalAmount = data.reduce((total, cashin) => {
+      return total + (cashin.amount || 0); // Pastikan cashin.amount ada, jika tidak default ke 0
     }, 0);
 
     setValueAmount(totalAmount);
   };
   
   const handleBackPage = () => {
-    router.push(`/expenses`);
+    router.push(`/income`);
   }
 
   console.log(selectedDate, "selectedDate");
@@ -89,16 +89,16 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   useEffect(() => {
     if (id) {
       if (dummyData) {
-        const findExpensesData = dummyData?.find((x) => x?.id === id);
-        setValueTitle(findExpensesData?.title || "");
-        const dateString = findExpensesData?.tanggal || "";
+        const findIncomeData = dummyData?.find((x) => x?.id === id);
+        setValueTitle(findIncomeData?.title || "");
+        const dateString = findIncomeData?.date || "";
         const parsedDate = dayjs(dateString);
         setSelectedDate(parsedDate);
         if (dummyDataDetails) {
-          const filterAllCashout = dummyDataDetails?.filter(
-            (x) => x?.expenseId === id
+          const filterAllCashin = dummyDataDetails?.filter(
+            (x) => x?.incomeId === id
           );
-          setAllCashout(filterAllCashout);
+          setAllCashin(filterAllCashin);
         }
       }
     }
@@ -107,22 +107,22 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   useEffect(() => {
     if (openDialogAdd == false) {
       if (openDialog == false) {
-        setCashout(undefined);
+        setCashin(undefined);
       }
       setValueDesc("");
-      setValueExpensesAmount("0,00");
+      setValueIncomeAmount("0,00");
     } else {
-      if (cashout) {
-        setValueDesc(cashout?.desc);
-        const formatAmount = formatNumberToIDR(cashout?.amount);
-        setValueExpensesAmount(formatAmount);
+      if (cashin) {
+        setValueDesc(cashin?.desc);
+        const formatAmount = formatNumberToIDR(cashin?.amount);
+        setValueIncomeAmount(formatAmount);
       }
     }
-  }, [openDialogAdd, cashout, openDialog]);
+  }, [openDialogAdd, cashin, openDialog]);
 
   useEffect(() => {
-    calculateTotalCashout(allCashout);
-  }, [allCashout]);
+    calculateTotalCashin(allCashin);
+  }, [allCashin]);
 
   const handlDescChange: React.ChangeEventHandler<
     HTMLInputElement | HTMLTextAreaElement
@@ -146,20 +146,18 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
 
   const handleAdd = () => {
     setOpenDialogAdd(true);
-    //   router.push(`/expenses/add`);
   };
 
-  console.log(cashout, "cashout");
+  console.log(cashin, "cashin");
 
   const handleEdit = (data: CashOutInterface) => {
-    setCashout(data);
+    setCashin(data);
     setOpenDialogAdd(true);
-    // router.push(`/expenses/edit/${data.id}`);
     handleMenuClose();
   };
 
   const handleDeleteClick = (data?: CashOutInterface) => {
-    setCashout(data);
+    setCashin(data);
     console.log(data);
     setOpenDialog(true);
     handleMenuClose();
@@ -168,8 +166,8 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   const handleDeleteConfirm = (data?: CashOutInterface) => {
     console.log(data);
     if (data) {
-      setAllCashout((prevCashout) =>
-        prevCashout.filter((item) => item.id !== data.id)
+      setAllCashin((prevCashin) =>
+        prevCashin.filter((item) => item.id !== data.id)
       );
     }
 
@@ -178,26 +176,26 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
 
   const handleSubmitCashOut = (data?: CashOutInterface) => {
     if (!data) {
-      const newCashout = {
+      const newCashin = {
         id: crypto.randomUUID(),
         desc: valueDesc,
-        amount: parseFormattedNumber(valueExpensesAmount),
+        amount: parseFormattedNumber(valueIncomeAmount),
       };
-      setAllCashout([...allCashout, newCashout]);
-      setCashout(undefined);
+      setAllCashin([...allCashin, newCashin]);
+      setCashin(undefined);
     } else {
-      setAllCashout((prevCashout) =>
-        prevCashout.map((item) =>
+      setAllCashin((prevCashin) =>
+        prevCashin.map((item) =>
           item.id === data.id
             ? {
                 ...item,
                 desc: valueDesc,
-                amount: parseFormattedNumber(valueExpensesAmount),
+                amount: parseFormattedNumber(valueIncomeAmount),
               }
             : item
         )
       );
-      setCashout(undefined);
+      setCashin(undefined);
     }
     setOpenDialogAdd(false);
   };
@@ -205,7 +203,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   return (
     <div>
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        Expenses Form
+        Income Form
       </Typography>
       <Box
         width="100%"
@@ -253,7 +251,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               sx={{ bgcolor: "#904cee" }}
               onClick={handleAdd}
             >
-              Add Cashout
+              Add Cash-in
             </Button>
           </Box>
         )}
@@ -276,7 +274,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               >
                 <Box>
                   <Typography variant="body1" paddingTop={2} fontWeight="bold">
-                    Cashout List
+                    Cash-in List
                   </Typography>
                 </Box>
               </Box>
@@ -289,7 +287,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               </Box>
             </Box>
 
-            {allCashout?.length === 0 ? (
+            {allCashin?.length === 0 ? (
               <Box
                 display="flex"
                 justifyContent="center"
@@ -302,7 +300,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               </Box>
             ) : (
               <List>
-                {allCashout?.map((x) => (
+                {allCashin?.map((x) => (
                   <ListItem
                     key={x?.id}
                     alignItems="flex-start"
@@ -362,7 +360,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                           <Box display="flex" justifyContent="space-between">
                             <Typography
                               component="span"
-                              color="error"
+                              color="success"
                               variant="body2"
                             >
                               {formatCurrencyIDR(x?.amount)}
@@ -431,7 +429,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
             Cancel
           </Button>
           <Button
-            onClick={() => handleDeleteConfirm(cashout)}
+            onClick={() => handleDeleteConfirm(cashin)}
             variant="contained"
             sx={{ bgcolor: "#904cee" }}
           >
@@ -445,7 +443,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Cashout</DialogTitle>
+        <DialogTitle>Cash-in</DialogTitle>
         <DialogContent>
           <Box width="100%" display="flex" gap={3} flexDirection="column">
             <Box width="100%">
@@ -462,9 +460,9 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
             </Box>
             <Box width="100%">
               <NumberTextField
-                label="Expenses Amount"
-                value={valueExpensesAmount}
-                onChange={setValueExpensesAmount}
+                label="Income Amount"
+                value={valueIncomeAmount}
+                onChange={setValueIncomeAmount}
               />
             </Box>
           </Box>
@@ -478,10 +476,10 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
             Cancel
           </Button>
           <Button
-            onClick={() => handleSubmitCashOut(cashout)}
+            onClick={() => handleSubmitCashOut(cashin)}
             variant="contained"
             sx={{ bgcolor: "#904cee" }}
-            disabled={valueDesc && valueExpensesAmount != "0,00" ? false : true}
+            disabled={valueDesc && valueIncomeAmount != "0,00" ? false : true}
           >
             Save
           </Button>
@@ -491,4 +489,4 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   );
 };
 
-export default ExpensesForm;
+export default IncomeForm;

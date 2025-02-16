@@ -5,9 +5,9 @@ export interface DummyDataListingProps {
     pengeluaran: number
 }
 
-export interface DummyDataDetailsProps {
+export interface CashOutInterface {
     id: string,
     expenseId: string,
-    title: string,
-    pengeluaran: number
+    desc: string,
+    amount: number
 }

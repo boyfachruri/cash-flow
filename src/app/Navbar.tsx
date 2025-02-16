@@ -20,7 +20,7 @@ import ListItemText from "@mui/material/ListItemText";
 import GridViewIcon from "@mui/icons-material/GridView";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
-import { Divider } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
 
 const drawerWidth = 240;
 
@@ -96,6 +96,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           >
             <MenuIcon />
           </IconButton>
+          <Typography>Cash Flow By R3g Software</Typography>
         </Toolbar>
       </AppBar>
 
@@ -129,13 +130,29 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         }}
       >
         <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
-            ) : (
-              <ChevronRightIcon />
-            )}
-          </IconButton>
+          <Box width="100%" display="flex">
+            <Box
+              width="50%"
+              display="flex"
+              alignItems="center"
+              justifyContent="flex-start"
+            >
+              <Box>
+                <Typography fontWeight="bold" color="secondary">R3g Software</Typography>
+              </Box>
+            </Box>
+            <Box width="50%" display="flex" justifyContent="flex-end">
+              <Box>
+                <IconButton onClick={handleDrawerClose}>
+                  {theme.direction === "ltr" ? (
+                    <ChevronLeftIcon />
+                  ) : (
+                    <ChevronRightIcon />
+                  )}
+                </IconButton>
+              </Box>
+            </Box>
+          </Box>
         </DrawerHeader>
         <List>
           <ListItem key={dashboard.id} disablePadding>
@@ -188,9 +205,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 <ListItemText
                   primary={x.name}
                   sx={{
-                    fontWeight: pathname.startsWith(x.link)
-                      ? "bold"
-                      : "normal",
+                    fontWeight: pathname.startsWith(x.link) ? "bold" : "normal",
                   }}
                 />
               </ListItemButton>
@@ -206,4 +221,3 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     </Box>
   );
 }
-

@@ -22,11 +22,11 @@ import Grid from "@mui/material/Grid2";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useRouter } from "next/navigation";
-import { dummyData } from "./data";
-import { DummyDataListingProps } from "./interfaceProps";
 import { DateFormatter } from "@/components/functions/DateFormatter";
+import { dummyData } from "./data";
+import { IncomeListInterface } from "./interfaceProps";
 
-const ExpensesList = () => {
+const IncomeList = () => {
   const router = useRouter();
   const [menuAnchor, setMenuAnchor] = useState<{
     anchorEl: HTMLElement | null;
@@ -46,8 +46,8 @@ const ExpensesList = () => {
   const filteredData = dummyData.filter(
     (item) =>
       item.title.toLowerCase().includes(searchQuery) ||
-      DateFormatter(item.tanggal).includes(searchQuery) ||
-      item.pengeluaran.toString().includes(searchQuery)
+      DateFormatter(item.date).includes(searchQuery) ||
+      item.amount.toString().includes(searchQuery)
   );
 
   // Handle open/close menu
@@ -59,21 +59,17 @@ const ExpensesList = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
   const handleAdd = () => {
-    router.push(`/expenses/add`);
+    router.push(`/income/add`);
   };
 
   // Aksi untuk pindah screen
-  const handleView = (data: DummyDataListingProps) => {
-    console.log(data, "data");
-
-    router.push(`/expenses/view/${data.id}`);
+  const handleView = (data: IncomeListInterface) => {
+    router.push(`/income/view/${data.id}`);
     handleMenuClose();
   };
 
-  const handleEdit = (data: DummyDataListingProps) => {
-    console.log(data, "data");
-
-    router.push(`/expenses/edit/${data.id}`);
+  const handleEdit = (data: IncomeListInterface) => {
+    router.push(`/income/edit/${data.id}`);
     handleMenuClose();
   };
 
@@ -83,7 +79,7 @@ const ExpensesList = () => {
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data: DummyDataListingProps) => {
+  const handleDeleteConfirm = (data: IncomeListInterface) => {
     console.log("Delete data:", data);
     setOpenDialog(false);
   };
@@ -92,7 +88,7 @@ const ExpensesList = () => {
     <div>
       {/* <div> */}
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        Expenses List
+        Income List
       </Typography>
       <Grid container spacing={2}>
         <Grid size={{ xs: 9, md: 11 }}>
@@ -164,7 +160,7 @@ const ExpensesList = () => {
                       {x?.title}
                     </Typography>
                     <Typography component="span" variant="body2">
-                      {DateFormatter(x?.tanggal)}
+                      {DateFormatter(x?.date)}
                     </Typography>
                   </Box>
                 </Typography>
@@ -172,8 +168,12 @@ const ExpensesList = () => {
               secondary={
                 <Typography component="div">
                   <Box display="flex" justifyContent="space-between">
-                    <Typography component="span" color="error" variant="body2">
-                      {formatCurrencyIDR(x?.pengeluaran)}
+                    <Typography
+                      component="span"
+                      color="success"
+                      variant="body2"
+                    >
+                      {formatCurrencyIDR(x?.amount)}
                     </Typography>
                     {/* <Typography component="span" variant="body2" >
                       {x?.tanggal}
@@ -184,30 +184,6 @@ const ExpensesList = () => {
             />
           </ListItem>
         ))}
-
-        {/* <Divider variant="inset" component="li" /> */}
-
-        {/* <Divider variant="inset" component="li" /> */}
-        {/* <ListItem alignItems="flex-start">
-          <ListItemAvatar>
-            <Avatar alt="Cindy Baker" src="/static/images/avatar/3.jpg" />
-          </ListItemAvatar>
-          <ListItemText
-            primary="Oui Oui"
-            secondary={
-              <React.Fragment>
-                <Typography
-                  component="span"
-                  variant="body2"
-                  sx={{ color: "text.primary", display: "inline" }}
-                >
-                  Sandra Adams
-                </Typography>
-                {" — Do you have Paris recommendations? Have you ever…"}
-              </React.Fragment>
-            }
-          />
-        </ListItem> */}
       </List>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Konfirmasi Hapus</DialogTitle>
@@ -229,4 +205,4 @@ const ExpensesList = () => {
   );
 };
 
-export default ExpensesList;
+export default IncomeList;
