@@ -8,25 +8,22 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   IconButton,
-  InputBase,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemText,
   Menu,
   MenuItem,
   Typography,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import React, { useState } from "react";
 import Search from "@/components/Search";
 import Grid from "@mui/material/Grid2";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { dummyData } from "./data";
+import { DummyDataListingProps } from "./interfaceProps";
 
 const ExpensesList = () => {
   const router = useRouter();
@@ -61,14 +58,14 @@ const ExpensesList = () => {
   };
 
   // Aksi untuk pindah screen
-  const handleView = (data: any) => {
+  const handleView = (data: DummyDataListingProps) => {
     console.log(data, "data");
 
     router.push(`/expenses/view/${data.id}`);
     handleMenuClose();
   };
 
-  const handleEdit = (data: any) => {
+  const handleEdit = (data: DummyDataListingProps) => {
     console.log(data, "data");
 
     router.push(`/expenses/edit/${data.id}`);
@@ -81,7 +78,7 @@ const ExpensesList = () => {
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data: any) => {
+  const handleDeleteConfirm = (data: DummyDataListingProps) => {
     console.log("Delete data:", data);
     setOpenDialog(false);
   };
@@ -211,7 +208,7 @@ const ExpensesList = () => {
           <Button onClick={() => setOpenDialog(false)} color="primary">
             Tidak
           </Button>
-          <Button onClick={handleDeleteConfirm} color="error">
+          <Button onClick={() => handleDeleteConfirm} color="error">
             Ya, Hapus
           </Button>
         </DialogActions>

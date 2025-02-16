@@ -3,16 +3,11 @@
 import {
   Box,
   Button,
-  Divider,
-  IconButton,
-  InputBase,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemText,
   Typography,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import React from "react";
 import Search from "@/components/Search";
 import Grid from "@mui/material/Grid2";

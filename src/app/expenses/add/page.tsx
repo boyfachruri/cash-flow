@@ -1,11 +1,7 @@
 import React from 'react'
 import ExpensesForm from './ExpensesForm';
 
-const expensesAddPage = async ({
-    params,
-  }: {
-    params: Promise<{ id: string }>;
-  }) => {
+const expensesAddPage = () => {
     const mode = 'add'
   return <ExpensesForm mode={mode} />;
 };

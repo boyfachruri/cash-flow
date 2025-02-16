@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { styled, useTheme } from "@mui/material/styles";

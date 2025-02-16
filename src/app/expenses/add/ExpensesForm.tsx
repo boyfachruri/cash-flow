@@ -3,7 +3,11 @@
 import {
   Box,
   Button,
-  Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   List,
   ListItem,
@@ -13,28 +17,38 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { dummyDataDetails } from "../data";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import dayjs, { Dayjs } from "dayjs";
+import { DummyDataDetailsProps } from "../interfaceProps";
 
 interface ExpensesFormInterface {
-  id?: String;
+  id?: string;
   mode?: string;
 }
 
 const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
-  const [valueTitle, setValueTitle] = useState<String>("");
-  const [valueAmount, setValueAmount] = useState<String>("");
+  const [valueTitle, setValueTitle] = useState<string>("");
+  const [valueAmount, setValueAmount] = useState<number>(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const open = Boolean(anchorEl);
+  
+
+  useEffect(() => {
+    if (id && mode == 'view') {
+        setValueTitle('Coba Pengeluaran')
+        setValueAmount(200000)
+    }
+
+  }, [id, mode])
+  
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -44,11 +58,11 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
     setAnchorEl(null);
   };
 
-  const handleAdd = () => {
-    //   router.push(`/expenses/add`);
-  };
-  const handleEdit = (data: any) => {
-    // console.log(data, 'data');
+//   const handleAdd = () => {
+//     //   router.push(`/expenses/add`);
+//   };
+  const handleEdit = (data: DummyDataDetailsProps) => {
+    console.log(data, 'data');
 
     // router.push(`/expenses/edit/${data.id}`);
     handleMenuClose();
@@ -59,7 +73,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data: any) => {
+  const handleDeleteConfirm = (data: DummyDataDetailsProps) => {
     console.log("Delete data:", data);
     setOpenDialog(false);
   };
@@ -222,6 +236,22 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
           </Button>
         </Box>
       </Box>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Konfirmasi Hapus</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Apakah Anda yakin ingin menghapus?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Tidak
+          </Button>
+          <Button onClick={() => handleDeleteConfirm} color="error">
+            Ya, Hapus
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
