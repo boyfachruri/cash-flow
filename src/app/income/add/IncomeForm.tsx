@@ -84,7 +84,6 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
     router.push(`/income`);
   }
 
-  console.log(selectedDate, "selectedDate");
 
   useEffect(() => {
     if (id) {
@@ -148,8 +147,6 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
     setOpenDialogAdd(true);
   };
 
-  console.log(cashin, "cashin");
-
   const handleEdit = (data: CashOutInterface) => {
     setCashin(data);
     setOpenDialogAdd(true);
@@ -158,13 +155,12 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
 
   const handleDeleteClick = (data?: CashOutInterface) => {
     setCashin(data);
-    console.log(data);
     setOpenDialog(true);
     handleMenuClose();
   };
 
   const handleDeleteConfirm = (data?: CashOutInterface) => {
-    console.log(data);
+
     if (data) {
       setAllCashin((prevCashin) =>
         prevCashin.filter((item) => item.id !== data.id)
@@ -437,6 +433,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
           </Button>
         </DialogActions>
       </Dialog>
+      
       <Dialog
         open={openDialogAdd}
         onClose={() => setOpenDialogAdd(false)}

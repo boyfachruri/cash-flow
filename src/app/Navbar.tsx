@@ -18,9 +18,11 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import GridViewIcon from "@mui/icons-material/GridView";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import { Divider, Typography } from "@mui/material";
+import CalculateIcon from '@mui/icons-material/Calculate';
+import AddCardIcon from '@mui/icons-material/AddCard';
+import PeopleIcon from '@mui/icons-material/People';
 
 const drawerWidth = 240;
 
@@ -63,14 +65,28 @@ const dashboard = {
   icons: <GridViewIcon />,
 };
 
+const userList = {
+  id: 5,
+  name: "User List",
+  link: "/user-list",
+  icons: <PeopleIcon />,
+};
+
+
 const listApp = [
-  { id: 2, name: "Income", link: "/income", icons: <AddShoppingCartIcon /> },
+  { id: 2, name: "Income", link: "/income", icons: <AddCardIcon /> },
   {
     id: 3,
     name: "Expenses",
     link: "/expenses",
     icons: <ShoppingCartCheckoutIcon />,
   },
+  {
+    id: 4,
+    name: "Financial Overview",
+    link: "/financial-overview",
+    icons: <CalculateIcon />,
+  }, 
 ];
 
 export default function Navbar({ children }: { children: React.ReactNode }) {
@@ -184,6 +200,35 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         </List>
         <Divider />
         <List>
+          <ListItem key={userList.id} disablePadding>
+            <ListItemButton
+              onClick={() => router.push(userList.link)}
+              sx={{
+                bgcolor: pathname.startsWith(userList.link)
+                  ? "#EEE6FF"
+                  : "transparent",
+                borderLeft: pathname.startsWith(userList.link)
+                  ? "4px solid #904cee"
+                  : "none",
+                "&:hover": {
+                  bgcolor: "#EEE6FF",
+                },
+              }}
+            >
+              <ListItemIcon>{userList.icons}</ListItemIcon>
+              <ListItemText
+                primary={userList.name}
+                sx={{
+                  fontWeight: pathname.startsWith(userList.link)
+                    ? "bold"
+                    : "normal",
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
           {/* Menu lainnya */}
           {listApp.map((x) => (
             <ListItem key={x.id} disablePadding>
@@ -212,8 +257,9 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
             </ListItem>
           ))}
         </List>
+        <Divider />
       </Drawer>
-
+     
       <Main>
         <DrawerHeader />
         {children}

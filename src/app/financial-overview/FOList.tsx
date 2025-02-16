@@ -23,10 +23,10 @@ import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useRouter } from "next/navigation";
 import { DateFormatter } from "@/components/functions/DateFormatter";
-import { dummyData } from "./data";
-import { IncomeListInterface } from "./interfaceProps";
+import { FOData } from "./data";
+import { FOListingProps } from "./interface";
 
-const IncomeList = () => {
+const FOList = () => {
   const router = useRouter();
   const [menuAnchor, setMenuAnchor] = useState<{
     anchorEl: HTMLElement | null;
@@ -43,11 +43,11 @@ const IncomeList = () => {
   };
 
   // Filter data berdasarkan pencarian
-  const filteredData = dummyData.filter(
-    (item) =>
-      item.title.toLowerCase().includes(searchQuery) ||
-      DateFormatter(item.date).includes(searchQuery) ||
-      item.amount.toString().includes(searchQuery)
+  const filteredData = FOData.filter(
+    (item) => item.title.toLowerCase().includes(searchQuery)
+    // ||
+    //   DateFormatter(item.date).includes(searchQuery) ||
+    //   item.amount.toString().includes(searchQuery)
   );
 
   // Handle open/close menu
@@ -59,17 +59,17 @@ const IncomeList = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
   const handleAdd = () => {
-    router.push(`/income/add`);
+    router.push(`/financial-overview/add`);
   };
 
   // Aksi untuk pindah screen
-  const handleView = (data: IncomeListInterface) => {
-    router.push(`/income/view/${data.id}`);
+  const handleView = (data: FOListingProps) => {
+    router.push(`/financial-overview/view/${data.id}`);
     handleMenuClose();
   };
 
-  const handleEdit = (data: IncomeListInterface) => {
-    router.push(`/income/edit/${data.id}`);
+  const handleEdit = (data: FOListingProps) => {
+    router.push(`/financial-overview/edit/${data.id}`);
     handleMenuClose();
   };
 
@@ -79,8 +79,7 @@ const IncomeList = () => {
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data: IncomeListInterface) => {
-
+  const handleDeleteConfirm = (data: FOListingProps) => {
     setOpenDialog(false);
   };
 
@@ -160,7 +159,7 @@ const IncomeList = () => {
                       {x?.title}
                     </Typography>
                     <Typography component="span" variant="body2">
-                      {DateFormatter(x?.date)}
+                      {DateFormatter(x?.fromDate)} - {DateFormatter(x?.toDate)}
                     </Typography>
                   </Box>
                 </Typography>
@@ -168,16 +167,31 @@ const IncomeList = () => {
               secondary={
                 <Typography component="div">
                   <Box display="flex" justifyContent="space-between">
+                    <Typography>
+                      <Typography
+                        component="span"
+                        color="success"
+                        variant="body2"
+                      >
+                        {formatCurrencyIDR(x?.income)}
+                      </Typography>{" "}
+                      /{" "}
+                      <Typography
+                        component="span"
+                        color="error"
+                        variant="body2"
+                      >
+                        {formatCurrencyIDR(x?.expenses)}
+                      </Typography>
+                    </Typography>
+
                     <Typography
                       component="span"
-                      color="success"
                       variant="body2"
+                      color="secondary"
                     >
-                      {formatCurrencyIDR(x?.amount)}
+                      {formatCurrencyIDR(x?.balance)}
                     </Typography>
-                    {/* <Typography component="span" variant="body2" >
-                      {x?.tanggal}
-                    </Typography> */}
                   </Box>
                 </Typography>
               }
@@ -213,4 +227,4 @@ const IncomeList = () => {
   );
 };
 
-export default IncomeList;
+export default FOList;

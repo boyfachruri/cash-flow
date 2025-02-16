@@ -83,9 +83,6 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   const handleBackPage = () => {
     router.push(`/expenses`);
   }
-
-  console.log(selectedDate, "selectedDate");
-
   useEffect(() => {
     if (id) {
       if (dummyData) {
@@ -94,6 +91,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
         const dateString = findExpensesData?.tanggal || "";
         const parsedDate = dayjs(dateString);
         setSelectedDate(parsedDate);
+  
         if (dummyDataDetails) {
           const filterAllCashout = dummyDataDetails?.filter(
             (x) => x?.expenseId === id
@@ -102,7 +100,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
         }
       }
     }
-  }, [id, dummyData, dummyDataDetails]);
+  }, [id, dummyData, dummyDataDetails]); 
 
   useEffect(() => {
     if (openDialogAdd == false) {
@@ -149,8 +147,6 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
     //   router.push(`/expenses/add`);
   };
 
-  console.log(cashout, "cashout");
-
   const handleEdit = (data: CashOutInterface) => {
     setCashout(data);
     setOpenDialogAdd(true);
@@ -160,13 +156,12 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
 
   const handleDeleteClick = (data?: CashOutInterface) => {
     setCashout(data);
-    console.log(data);
     setOpenDialog(true);
     handleMenuClose();
   };
 
   const handleDeleteConfirm = (data?: CashOutInterface) => {
-    console.log(data);
+
     if (data) {
       setAllCashout((prevCashout) =>
         prevCashout.filter((item) => item.id !== data.id)

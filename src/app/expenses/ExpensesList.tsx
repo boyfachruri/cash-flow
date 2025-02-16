@@ -64,15 +64,11 @@ const ExpensesList = () => {
 
   // Aksi untuk pindah screen
   const handleView = (data: DummyDataListingProps) => {
-    console.log(data, "data");
-
     router.push(`/expenses/view/${data.id}`);
     handleMenuClose();
   };
 
   const handleEdit = (data: DummyDataListingProps) => {
-    console.log(data, "data");
-
     router.push(`/expenses/edit/${data.id}`);
     handleMenuClose();
   };
@@ -84,7 +80,6 @@ const ExpensesList = () => {
   };
 
   const handleDeleteConfirm = (data: DummyDataListingProps) => {
-    console.log("Delete data:", data);
     setOpenDialog(false);
   };
 
@@ -184,47 +179,31 @@ const ExpensesList = () => {
             />
           </ListItem>
         ))}
-
-        {/* <Divider variant="inset" component="li" /> */}
-
-        {/* <Divider variant="inset" component="li" /> */}
-        {/* <ListItem alignItems="flex-start">
-          <ListItemAvatar>
-            <Avatar alt="Cindy Baker" src="/static/images/avatar/3.jpg" />
-          </ListItemAvatar>
-          <ListItemText
-            primary="Oui Oui"
-            secondary={
-              <React.Fragment>
-                <Typography
-                  component="span"
-                  variant="body2"
-                  sx={{ color: "text.primary", display: "inline" }}
-                >
-                  Sandra Adams
-                </Typography>
-                {" — Do you have Paris recommendations? Have you ever…"}
-              </React.Fragment>
-            }
-          />
-        </ListItem> */}
       </List>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Konfirmasi Hapus</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Apakah Anda yakin ingin menghapus?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="primary">
-            Tidak
-          </Button>
-          <Button onClick={() => handleDeleteConfirm} color="error">
-            Ya, Hapus
-          </Button>
-        </DialogActions>
-      </Dialog>
+              <DialogTitle>Delete Confirmation</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  Are you sure you want to delete?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => setOpenDialog(false)}
+                  variant="contained"
+                  sx={{ bgcolor: "#904cee" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleDeleteConfirm}
+                  variant="contained"
+                  sx={{ bgcolor: "#904cee" }}
+                >
+                  Delete
+                </Button>
+              </DialogActions>
+            </Dialog>
     </div>
   );
 };

@@ -19,14 +19,13 @@ import {
 import React, { useState } from "react";
 import Search from "@/components/Search";
 import Grid from "@mui/material/Grid2";
-import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useRouter } from "next/navigation";
 import { DateFormatter } from "@/components/functions/DateFormatter";
-import { dummyData } from "./data";
-import { IncomeListInterface } from "./interfaceProps";
+import { UserData } from "./data";
+import { UserListInterface } from "./interface";
 
-const IncomeList = () => {
+const UserList = () => {
   const router = useRouter();
   const [menuAnchor, setMenuAnchor] = useState<{
     anchorEl: HTMLElement | null;
@@ -43,11 +42,12 @@ const IncomeList = () => {
   };
 
   // Filter data berdasarkan pencarian
-  const filteredData = dummyData.filter(
+  const filteredData = UserData.filter(
     (item) =>
-      item.title.toLowerCase().includes(searchQuery) ||
+      item.role.toLowerCase().includes(searchQuery) ||
       DateFormatter(item.date).includes(searchQuery) ||
-      item.amount.toString().includes(searchQuery)
+      item.name.toString().includes(searchQuery) ||
+      item.status.toString().includes(searchQuery)
   );
 
   // Handle open/close menu
@@ -59,17 +59,17 @@ const IncomeList = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
   const handleAdd = () => {
-    router.push(`/income/add`);
+    router.push(`/user-list/add`);
   };
 
   // Aksi untuk pindah screen
-  const handleView = (data: IncomeListInterface) => {
-    router.push(`/income/view/${data.id}`);
+  const handleView = (data: UserListInterface) => {
+    router.push(`/user-list/view/${data.id}`);
     handleMenuClose();
   };
 
-  const handleEdit = (data: IncomeListInterface) => {
-    router.push(`/income/edit/${data.id}`);
+  const handleEdit = (data: UserListInterface) => {
+    router.push(`/user-list/edit/${data.id}`);
     handleMenuClose();
   };
 
@@ -79,8 +79,7 @@ const IncomeList = () => {
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data: IncomeListInterface) => {
-
+  const handleDeleteConfirm = (data: UserListInterface) => {
     setOpenDialog(false);
   };
 
@@ -136,14 +135,16 @@ const IncomeList = () => {
                       Edit
                     </Typography>
                   </MenuItem>
-                  <MenuItem
-                    onClick={handleDeleteClick}
-                    sx={{ color: "error.main" }}
-                  >
-                    <Typography component="span" variant="body2">
-                      Delete
-                    </Typography>
-                  </MenuItem>
+                  {x?.status === "Active" && (
+                    <MenuItem
+                      onClick={handleDeleteClick}
+                      sx={{ color: "error.main" }}
+                    >
+                      <Typography component="span" variant="body2">
+                        Inactive
+                      </Typography>
+                    </MenuItem>
+                  )}
                 </Menu>
               </>
             }
@@ -157,7 +158,7 @@ const IncomeList = () => {
                       variant="body2"
                       fontWeight="bold"
                     >
-                      {x?.title}
+                      {x?.name}
                     </Typography>
                     <Typography component="span" variant="body2">
                       {DateFormatter(x?.date)}
@@ -170,10 +171,17 @@ const IncomeList = () => {
                   <Box display="flex" justifyContent="space-between">
                     <Typography
                       component="span"
-                      color="success"
                       variant="body2"
+                      //   fontWeight="bold"
                     >
-                      {formatCurrencyIDR(x?.amount)}
+                      {x?.role}
+                    </Typography>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color={x?.status === "Inactive" ? "error" : "success"}
+                    >
+                      {x?.status}
                     </Typography>
                     {/* <Typography component="span" variant="body2" >
                       {x?.tanggal}
@@ -186,10 +194,10 @@ const IncomeList = () => {
         ))}
       </List>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Delete Confirmation</DialogTitle>
+        <DialogTitle>Inactive Confirmation</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete?
+            Are you sure you want to Inactive?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -205,7 +213,7 @@ const IncomeList = () => {
             variant="contained"
             sx={{ bgcolor: "#904cee" }}
           >
-            Delete
+            Process
           </Button>
         </DialogActions>
       </Dialog>
@@ -213,4 +221,4 @@ const IncomeList = () => {
   );
 };
 
-export default IncomeList;
+export default UserList;
