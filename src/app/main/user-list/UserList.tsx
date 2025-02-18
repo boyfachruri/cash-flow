@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { DateFormatter } from "@/components/functions/DateFormatter";
 import { UserData } from "./data";
 import { fetchUser, UserInterface } from "@/utils/user";
+import Loader from "@/components/loader";
 
 const UserList = () => {
   const router = useRouter();
@@ -150,7 +151,9 @@ const UserList = () => {
       {/* </div> */}
 
       <List>
-        {filteredData?.map((x) => (
+        
+        { loading ? <Loader /> :
+        filteredData?.map((x) => (
           <ListItem
             key={x?._id}
             alignItems="flex-start"
