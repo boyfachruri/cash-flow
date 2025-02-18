@@ -1,15 +1,17 @@
-'use client';
+import QueryProvider from "@/components/QueryProvider";
 
-import { useState, useEffect } from 'react';
-
-export default function Layout({ children }: { children: React.ReactNode }) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true); // Menandakan bahwa komponen sudah dirender di sisi klien
-  }, []);
-
-  if (!isClient) return null; // Jangan render elemen di sisi server
-
-  return <div>{children}</div>;
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <QueryProvider>
+      <html lang="en">
+        <body>
+          {children}
+        </body>
+      </html>
+    </QueryProvider>
+  );
 }
