@@ -12,7 +12,7 @@ interface RegisterData {
   password: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/";
+const API_BASE_URL = process.env.NEXT_LOCAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
 
 export const loginUser = async (loginData: LoginData) => {
   try {
