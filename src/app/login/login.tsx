@@ -148,6 +148,7 @@ export default function LoginForm() {
                   <>
                     <TextField
                       fullWidth
+                      color="secondary"
                       label="Username"
                       name="username"
                       value={formData.username}
@@ -158,6 +159,7 @@ export default function LoginForm() {
                     />
                     <TextField
                       fullWidth
+                      color="secondary"
                       label="Full Name"
                       name="fullname"
                       value={formData.fullname}
@@ -168,6 +170,7 @@ export default function LoginForm() {
                     />
                     <TextField
                       fullWidth
+                      color="secondary"
                       label="Email"
                       name="email"
                       type="email"
@@ -179,6 +182,7 @@ export default function LoginForm() {
                     />
                     <TextField
                       fullWidth
+                      color="secondary"
                       label="Password"
                       name="password"
                       type="password"
@@ -190,6 +194,7 @@ export default function LoginForm() {
                     />
                     <TextField
                       fullWidth
+                      color="secondary"
                       label="Confirm Password"
                       name="confirmPassword"
                       type="password"
@@ -204,6 +209,7 @@ export default function LoginForm() {
                   <>
                     <TextField
                       fullWidth
+                      color="secondary"
                       label="Username"
                       name="username"
                       value={formData.username}
@@ -214,6 +220,7 @@ export default function LoginForm() {
                     />
                     <TextField
                       fullWidth
+                      color="secondary"
                       label="Password"
                       name="password"
                       type="password"
