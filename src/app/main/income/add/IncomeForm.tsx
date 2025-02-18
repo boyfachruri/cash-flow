@@ -27,6 +27,7 @@ import dayjs, { Dayjs } from "dayjs";
 import NumberTextField from "@/components/NumberTextField";
 import { dummyData, dummyDataDetails } from "../data";
 import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/utils/auth";
 
 interface IncomeFormInterface {
   id?: string;
@@ -58,6 +59,17 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openDialogAdd, setOpenDialogAdd] = useState(false);
 
+    const [isLoading, setIsLoading] = useState(true);
+  
+    useEffect(() => {
+      if (!isAuthenticated()) {
+        // Redirect hanya di klien
+        router.push("/login");
+      } else {
+        setIsLoading(false); // Jika sudah login, selesai loading
+      }
+    }, []);
+
   function parseFormattedNumber(str: string) {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
   }
@@ -81,7 +93,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
   };
   
   const handleBackPage = () => {
-    router.push(`/income`);
+    router.push(`/main/income`);
   }
 
 

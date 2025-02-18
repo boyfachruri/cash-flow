@@ -16,7 +16,7 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Search from "@/components/Search";
 import Grid from "@mui/material/Grid2";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { dummyData } from "./data";
 import { DummyDataListingProps } from "./interfaceProps";
 import { DateFormatter } from "@/components/functions/DateFormatter";
+import { isAuthenticated } from "@/utils/auth";
 
 const ExpensesList = () => {
   const router = useRouter();
@@ -37,6 +38,16 @@ const ExpensesList = () => {
   });
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+      if (!isAuthenticated()) {
+        // Redirect hanya di klien
+        router.push('/login');
+      } else {
+        setIsLoading(false); // Jika sudah login, selesai loading
+      }
+    }, []); 
 
   const handleSearch = (query: string) => {
     setSearchQuery(query.toLowerCase());
@@ -59,17 +70,17 @@ const ExpensesList = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
   const handleAdd = () => {
-    router.push(`/expenses/add`);
+    router.push(`/main/expenses/add`);
   };
 
   // Aksi untuk pindah screen
   const handleView = (data: DummyDataListingProps) => {
-    router.push(`/expenses/view/${data.id}`);
+    router.push(`/main/expenses/view/${data.id}`);
     handleMenuClose();
   };
 
   const handleEdit = (data: DummyDataListingProps) => {
-    router.push(`/expenses/edit/${data.id}`);
+    router.push(`/main/expenses/edit/${data.id}`);
     handleMenuClose();
   };
 

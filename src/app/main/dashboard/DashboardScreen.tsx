@@ -20,6 +20,9 @@ import {
 //   ResponsiveContainer,
 // } from "recharts";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
+import { isAuthenticated } from '@/utils/auth';
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 // Contoh Data Dummy
 const initialData = [
@@ -37,7 +40,19 @@ const initialData = [
   { month: "December  ", income: 6000000, expenses: 3500000 },
 ];
 
+
 export default function DashboardScreen() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      // Redirect hanya di klien
+      router.push('/login');
+    } else {
+      setIsLoading(false); // Jika sudah login, selesai loading
+    }
+  }, []); 
   // const [data, setData] = useState(initialData);
 
   // Hitung total pemasukan, pengeluaran, dan saldo bersih

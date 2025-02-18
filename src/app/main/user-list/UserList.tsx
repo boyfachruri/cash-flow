@@ -16,17 +16,18 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Search from "@/components/Search";
 import Grid from "@mui/material/Grid2";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useRouter } from "next/navigation";
 import { DateFormatter } from "@/components/functions/DateFormatter";
 import { UserData } from "./data";
-import { UserListInterface } from "./interface";
+import { fetchUser, UserInterface } from "@/utils/user";
 
 const UserList = () => {
   const router = useRouter();
+  const [role, setRole] = useState<string | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<{
     anchorEl: HTMLElement | null;
     id: string | null;
@@ -36,17 +37,59 @@ const UserList = () => {
   });
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState<UserInterface[]>([]);
+  const [error, setError] = useState<string | null>(null); 
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Ambil role dari localStorage
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      setRole(user?.role || "user");
+
+      // Jika bukan admin, redirect ke dashboard
+      if (user.role !== "admin") {
+        router.replace("/main/dashboard");
+      }
+    } else {
+      router.replace("/login"); // Jika tidak ada data user, kembali ke login
+    }
+  }, []);
+
+  useEffect(() => {
+    const getUserData = async () => {
+      const token = localStorage.getItem('access_token'); // Ambil token dari localStorage
+      if (token) {
+        try {
+          const usersData = await fetchUser(token); // Panggil fetchUser untuk mengambil data pengguna
+          setUsers(usersData); // Set data pengguna ke state
+        } catch (error: any) {
+          setError('Failed to fetch user data');
+        } finally {
+          setLoading(false); // Set loading ke false setelah data diambil
+        }
+      } else {
+        setError('Token not found');
+        setLoading(false);
+      }
+    };
+
+    getUserData(); // Panggil fungsi untuk mengambil data pengguna
+  }, []);
+
+  if (!role) return <p>Loading...</p>;
 
   const handleSearch = (query: string) => {
     setSearchQuery(query.toLowerCase());
   };
 
   // Filter data berdasarkan pencarian
-  const filteredData = UserData.filter(
+  const filteredData = users.filter(
     (item) =>
       item.role.toLowerCase().includes(searchQuery) ||
-      DateFormatter(item.date).includes(searchQuery) ||
-      item.name.toString().includes(searchQuery) ||
+      DateFormatter(DateFormatter(String(item?.date))).includes(searchQuery) ||
+      item.fullname.toString().includes(searchQuery) ||
       item.status.toString().includes(searchQuery)
   );
 
@@ -59,17 +102,17 @@ const UserList = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
   const handleAdd = () => {
-    router.push(`/user-list/add`);
+    router.push(`/main/user-list/add`);
   };
 
   // Aksi untuk pindah screen
-  const handleView = (data: UserListInterface) => {
-    router.push(`/user-list/view/${data.id}`);
+  const handleView = (data: UserInterface) => {
+    router.push(`/main/user-list/view/${data._id}`);
     handleMenuClose();
   };
 
-  const handleEdit = (data: UserListInterface) => {
-    router.push(`/user-list/edit/${data.id}`);
+  const handleEdit = (data: UserInterface) => {
+    router.push(`/main/user-list/edit/${data._id}`);
     handleMenuClose();
   };
 
@@ -79,7 +122,7 @@ const UserList = () => {
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data: UserListInterface) => {
+  const handleDeleteConfirm = (data: UserInterface) => {
     setOpenDialog(false);
   };
 
@@ -87,7 +130,7 @@ const UserList = () => {
     <div>
       {/* <div> */}
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        Income List
+        User List
       </Typography>
       <Grid container spacing={2}>
         <Grid size={{ xs: 9, md: 11 }}>
@@ -109,20 +152,20 @@ const UserList = () => {
       <List>
         {filteredData?.map((x) => (
           <ListItem
-            key={x?.id}
+            key={x?._id}
             alignItems="flex-start"
             sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
             secondaryAction={
               <>
                 <IconButton
                   edge="end"
-                  onClick={(e) => handleMenuOpen(e, x.id!)}
+                  onClick={(e) => handleMenuOpen(e, x._id!)}
                 >
                   <MoreVertIcon />
                 </IconButton>
                 <Menu
                   anchorEl={menuAnchor.anchorEl}
-                  open={menuAnchor.anchorEl !== null && menuAnchor.id === x.id}
+                  open={menuAnchor.anchorEl !== null && menuAnchor.id === x._id}
                   onClose={handleMenuClose}
                 >
                   <MenuItem onClick={() => handleView(x)}>
@@ -158,10 +201,10 @@ const UserList = () => {
                       variant="body2"
                       fontWeight="bold"
                     >
-                      {x?.name}
+                      {x?.fullname}
                     </Typography>
                     <Typography component="span" variant="body2">
-                      {DateFormatter(x?.date)}
+                      {DateFormatter(String(x?.date))}
                     </Typography>
                   </Box>
                 </Typography>

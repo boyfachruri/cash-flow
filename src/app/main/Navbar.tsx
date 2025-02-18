@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -19,10 +19,13 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
-import { Divider, Typography } from "@mui/material";
-import CalculateIcon from '@mui/icons-material/Calculate';
-import AddCardIcon from '@mui/icons-material/AddCard';
-import PeopleIcon from '@mui/icons-material/People';
+import { Divider, Typography, Button, Menu, MenuItem } from "@mui/material";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import AddCardIcon from "@mui/icons-material/AddCard";
+import PeopleIcon from "@mui/icons-material/People";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { useState } from "react";
 
 const drawerWidth = 240;
 
@@ -61,42 +64,74 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 const dashboard = {
   id: 1,
   name: "Dashboard",
-  link: "/dashboard",
+  link: "/main/dashboard",
   icons: <GridViewIcon />,
 };
 
 const userList = {
   id: 5,
   name: "User List",
-  link: "/user-list",
+  link: "/main/user-list",
   icons: <PeopleIcon />,
 };
 
-
 const listApp = [
-  { id: 2, name: "Income", link: "/income", icons: <AddCardIcon /> },
+  { id: 2, name: "Income", link: "/main/income", icons: <AddCardIcon /> },
   {
     id: 3,
     name: "Expenses",
-    link: "/expenses",
+    link: "/main/expenses",
     icons: <ShoppingCartCheckoutIcon />,
   },
   {
     id: 4,
     name: "Financial Overview",
-    link: "/financial-overview",
+    link: "/main/financial-overview",
     icons: <CalculateIcon />,
-  }, 
+  },
 ];
 
 export default function Navbar({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const [fullName, setfullName] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // State untuk Menu
+  const [openMenu, setOpenMenu] = useState(false);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
+
+  useEffect(() => {
+    // Ambil role dari localStorage atau state global
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      setRole(user?.role || "user");
+      setfullName(user?.fullname);
+      setUserId(user?._id)
+    }
+  }, []);
+
+  const handleClickUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+    setOpenMenu(true);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setOpenMenu(false);
+  };
+
+  // Fungsi logout
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("access_token");
+    router.push("/login"); // Redirect ke halaman login
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -112,11 +147,39 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography>Cash Flow By R3g Software</Typography>
+          <Typography fontWeight="bold" variant="body2">
+            Hi, {fullName}
+          </Typography>
+          {/* Tombol Logout */}
+          <IconButton
+            color="inherit"
+            onClick={handleClickUserMenu}
+            sx={{ ml: "auto" }}
+          >
+            <AccountCircleIcon />
+          </IconButton>
+          {/* Menu untuk Logout dan Profil */}
+          <Menu
+            anchorEl={anchorEl}
+            open={openMenu}
+            onClose={handleCloseMenu}
+            MenuListProps={{
+              "aria-labelledby": "basic-button",
+            }}
+          >
+            <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
+              {" "}
+              <ListItemIcon>
+                <AccountCircleIcon />&nbsp; Account
+              </ListItemIcon>
+            </MenuItem>
+            <MenuItem onClick={handleLogout}><ListItemIcon>
+            <ExitToAppIcon />&nbsp; Logout
+              </ListItemIcon></MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 
-      {/* Drawer Mengambang */}
       <Drawer
         sx={{
           "& .MuiDrawer-paper": {
@@ -153,20 +216,18 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               alignItems="center"
               justifyContent="flex-start"
             >
-              <Box>
-                <Typography fontWeight="bold" color="secondary">R3g Software</Typography>
-              </Box>
+              <Typography fontWeight="bold" color="secondary">
+                R3g Cashflow
+              </Typography>
             </Box>
             <Box width="50%" display="flex" justifyContent="flex-end">
-              <Box>
-                <IconButton onClick={handleDrawerClose}>
-                  {theme.direction === "ltr" ? (
-                    <ChevronLeftIcon />
-                  ) : (
-                    <ChevronRightIcon />
-                  )}
-                </IconButton>
-              </Box>
+              <IconButton onClick={handleDrawerClose}>
+                {theme.direction === "ltr" ? (
+                  <ChevronLeftIcon />
+                ) : (
+                  <ChevronRightIcon />
+                )}
+              </IconButton>
             </Box>
           </Box>
         </DrawerHeader>
@@ -199,37 +260,28 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           </ListItem>
         </List>
         <Divider />
-        <List>
-          <ListItem key={userList.id} disablePadding>
-            <ListItemButton
-              onClick={() => router.push(userList.link)}
-              sx={{
-                bgcolor: pathname.startsWith(userList.link)
-                  ? "#EEE6FF"
-                  : "transparent",
-                borderLeft: pathname.startsWith(userList.link)
-                  ? "4px solid #904cee"
-                  : "none",
-                "&:hover": {
-                  bgcolor: "#EEE6FF",
-                },
-              }}
-            >
-              <ListItemIcon>{userList.icons}</ListItemIcon>
-              <ListItemText
-                primary={userList.name}
+        {role === "admin" && (
+          <List>
+            <ListItem key={userList.id} disablePadding>
+              <ListItemButton
+                onClick={() => router.push(userList.link)}
                 sx={{
-                  fontWeight: pathname.startsWith(userList.link)
-                    ? "bold"
-                    : "normal",
+                  bgcolor: pathname.startsWith(userList.link)
+                    ? "#EEE6FF"
+                    : "transparent",
+                  borderLeft: pathname.startsWith(userList.link)
+                    ? "4px solid #904cee"
+                    : "none",
                 }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
+              >
+                <ListItemIcon>{userList.icons}</ListItemIcon>
+                <ListItemText primary={userList.name} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        )}
         <Divider />
         <List>
-          {/* Menu lainnya */}
           {listApp.map((x) => (
             <ListItem key={x.id} disablePadding>
               <ListItemButton
@@ -259,7 +311,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         </List>
         <Divider />
       </Drawer>
-     
+
       <Main>
         <DrawerHeader />
         {children}

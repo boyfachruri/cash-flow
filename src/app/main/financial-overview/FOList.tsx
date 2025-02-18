@@ -16,17 +16,18 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Search from "@/components/Search";
 import Grid from "@mui/material/Grid2";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useRouter } from "next/navigation";
 import { DateFormatter } from "@/components/functions/DateFormatter";
-import { dummyData } from "./data";
-import { IncomeListInterface } from "./interfaceProps";
+import { FOData } from "./data";
+import { FOListingProps } from "./interface";
+import { isAuthenticated } from "@/utils/auth";
 
-const IncomeList = () => {
+const FOList = () => {
   const router = useRouter();
   const [menuAnchor, setMenuAnchor] = useState<{
     anchorEl: HTMLElement | null;
@@ -38,16 +39,27 @@ const IncomeList = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      // Redirect hanya di klien
+      router.push("/login");
+    } else {
+      setIsLoading(false); // Jika sudah login, selesai loading
+    }
+  }, []);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query.toLowerCase());
   };
 
   // Filter data berdasarkan pencarian
-  const filteredData = dummyData.filter(
-    (item) =>
-      item.title.toLowerCase().includes(searchQuery) ||
-      DateFormatter(item.date).includes(searchQuery) ||
-      item.amount.toString().includes(searchQuery)
+  const filteredData = FOData.filter(
+    (item) => item.title.toLowerCase().includes(searchQuery)
+    // ||
+    //   DateFormatter(item.date).includes(searchQuery) ||
+    //   item.amount.toString().includes(searchQuery)
   );
 
   // Handle open/close menu
@@ -59,17 +71,17 @@ const IncomeList = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
   const handleAdd = () => {
-    router.push(`/income/add`);
+    router.push(`/main/financial-overview/add`);
   };
 
   // Aksi untuk pindah screen
-  const handleView = (data: IncomeListInterface) => {
-    router.push(`/income/view/${data.id}`);
+  const handleView = (data: FOListingProps) => {
+    router.push(`/main/financial-overview/view/${data.id}`);
     handleMenuClose();
   };
 
-  const handleEdit = (data: IncomeListInterface) => {
-    router.push(`/income/edit/${data.id}`);
+  const handleEdit = (data: FOListingProps) => {
+    router.push(`/main/financial-overview/edit/${data.id}`);
     handleMenuClose();
   };
 
@@ -79,8 +91,7 @@ const IncomeList = () => {
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data: IncomeListInterface) => {
-
+  const handleDeleteConfirm = (data: FOListingProps) => {
     setOpenDialog(false);
   };
 
@@ -88,7 +99,7 @@ const IncomeList = () => {
     <div>
       {/* <div> */}
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        Income List
+        Financial Overview
       </Typography>
       <Grid container spacing={2}>
         <Grid size={{ xs: 9, md: 11 }}>
@@ -160,7 +171,7 @@ const IncomeList = () => {
                       {x?.title}
                     </Typography>
                     <Typography component="span" variant="body2">
-                      {DateFormatter(x?.date)}
+                      {DateFormatter(x?.fromDate)} - {DateFormatter(x?.toDate)}
                     </Typography>
                   </Box>
                 </Typography>
@@ -168,16 +179,31 @@ const IncomeList = () => {
               secondary={
                 <Typography component="div">
                   <Box display="flex" justifyContent="space-between">
+                    <Typography>
+                      <Typography
+                        component="span"
+                        color="success"
+                        variant="body2"
+                      >
+                        {formatCurrencyIDR(x?.income)}
+                      </Typography>{" "}
+                      /{" "}
+                      <Typography
+                        component="span"
+                        color="error"
+                        variant="body2"
+                      >
+                        {formatCurrencyIDR(x?.expenses)}
+                      </Typography>
+                    </Typography>
+
                     <Typography
                       component="span"
-                      color="success"
                       variant="body2"
+                      color="secondary"
                     >
-                      {formatCurrencyIDR(x?.amount)}
+                      {formatCurrencyIDR(x?.balance)}
                     </Typography>
-                    {/* <Typography component="span" variant="body2" >
-                      {x?.tanggal}
-                    </Typography> */}
                   </Box>
                 </Typography>
               }
@@ -213,4 +239,4 @@ const IncomeList = () => {
   );
 };
 
-export default IncomeList;
+export default FOList;
