@@ -17,17 +17,15 @@ const API_BASE_URL = process.env.NEXT_LOCAL_API_URL || process.env.NEXT_PUBLIC_A
 export const loginUser = async (loginData: LoginData) => {
   try {
     const response = await axios.post(`${API_BASE_URL}auth/login`, loginData);
-    
-    // Menyimpan token dan data user ke localStorage
+
+    // Simpan token & user ke localStorage
     localStorage.setItem('access_token', response.data.access_token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
-    
-    // Mengatur waktu untuk menghapus data setelah 1 jam (3600 detik)
-    setTimeout(() => {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('user');
-    }, 3600000);  // 3600000 ms = 1 jam
-    
+
+    // Simpan waktu kedaluwarsa (1 jam dari sekarang)
+    const expiryTime = Date.now() + 3600000; // 1 jam = 3600000 ms
+    localStorage.setItem('expiry_time', expiryTime.toString());
+
     window.location.href = '/main/dashboard';
   } catch (error: any) {
     console.error("Login error:", error.response?.data || error.message);
@@ -35,16 +33,28 @@ export const loginUser = async (loginData: LoginData) => {
   }
 };
 
+
 // src/utils/auth.ts
 export const isAuthenticated = (): boolean => {
+  if (typeof window === 'undefined') return false;
+
   try {
-    if (typeof window !== 'undefined') {
-      return !!localStorage.getItem('access_token');
+    const accessToken = localStorage.getItem('access_token');
+    const expiryTime = localStorage.getItem('expiry_time');
+
+    // Jika token tidak ada atau sudah kedaluwarsa, hapus & return false
+    if (!accessToken || !expiryTime || Date.now() > Number(expiryTime)) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('expiry_time');
+      return false;
     }
+
+    return true;
   } catch (error) {
     console.error("Error checking authentication:", error);
+    return false;
   }
-  return false;
 };
 
 export const logout = () => {

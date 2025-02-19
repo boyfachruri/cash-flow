@@ -25,9 +25,15 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import dayjs, { Dayjs } from "dayjs";
 import NumberTextField from "@/components/NumberTextField";
-import { dummyData, dummyDataDetails } from "../data";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/utils/auth";
+import {
+  createIncomeList,
+  fetchIncomeListById,
+  IncomeDetailsFormInterface,
+  updateIncome,
+} from "@/utils/income";
+import Loader from "@/components/loader";
 
 interface IncomeFormInterface {
   id?: string;
@@ -42,12 +48,11 @@ interface CashOutInterface {
 }
 
 const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
-  const router = useRouter();  
- const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
+  const router = useRouter();
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
   const [valueTitle, setValueTitle] = useState<string>("");
   const [valueDesc, setValueDesc] = useState<string>("");
-  const [valueIncomeAmount, setValueIncomeAmount] =
-    useState<string>("0,00");
+  const [valueIncomeAmount, setValueIncomeAmount] = useState<string>("0,00");
   const [valueAmount, setValueAmount] = useState<number>(0);
   const [menuAnchor, setMenuAnchor] = useState<{
     anchorEl: HTMLElement | null;
@@ -58,24 +63,16 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
   });
   const [openDialog, setOpenDialog] = useState(false);
   const [openDialogAdd, setOpenDialogAdd] = useState(false);
-
-    const [isLoading, setIsLoading] = useState(true);
-  
-    useEffect(() => {
-      if (!isAuthenticated()) {
-        // Redirect hanya di klien
-        router.push("/login");
-      } else {
-        setIsLoading(false); // Jika sudah login, selesai loading
-      }
-    }, []);
+  const [userId, setUserId] = useState("");
+  const [tokens, setTokens] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   function parseFormattedNumber(str: string) {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
   }
 
-  const [cashin, setCashin] = useState<CashOutInterface>();
-  const [allCashin, setAllCashin] = useState<CashOutInterface[]>([]);
+  const [cashin, setCashin] = useState<IncomeDetailsFormInterface>();
+  const [allCashin, setAllCashin] = useState<IncomeDetailsFormInterface[]>([]);
 
   const formatNumberToIDR = (num: number): string => {
     return new Intl.NumberFormat("id-ID", {
@@ -84,36 +81,53 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
     }).format(num);
   };
 
-  const calculateTotalCashin = (data: CashOutInterface[]) => {
+  const calculateTotalCashin = (data: IncomeDetailsFormInterface[]) => {
     const totalAmount = data.reduce((total, cashin) => {
       return total + (cashin.amount || 0); // Pastikan cashin.amount ada, jika tidak default ke 0
     }, 0);
 
     setValueAmount(totalAmount);
   };
-  
+
   const handleBackPage = () => {
     router.push(`/main/income`);
-  }
-
+  };
 
   useEffect(() => {
-    if (id) {
-      if (dummyData) {
-        const findIncomeData = dummyData?.find((x) => x?.id === id);
-        setValueTitle(findIncomeData?.title || "");
-        const dateString = findIncomeData?.date || "";
-        const parsedDate = dayjs(dateString);
-        setSelectedDate(parsedDate);
-        if (dummyDataDetails) {
-          const filterAllCashin = dummyDataDetails?.filter(
-            (x) => x?.incomeId === id
-          );
-          setAllCashin(filterAllCashin);
-        }
+    const userData = localStorage.getItem("user");
+    const token = localStorage.getItem("access_token");
+    if (userData && token) {
+      const user = JSON.parse(userData);
+      setUserId(user?._id);
+      setTokens(token);
+      if (!isAuthenticated()) {
+        // Redirect hanya di klien
+        router.push("/login");
+      } else {
+        if (id) {
+          if (userId && tokens) {
+            const fetchData = async () => {
+              try {
+                const response = await fetchIncomeListById(tokens, id, userId);
+                setValueTitle(response?.title || "");
+                const dateString = response?.date || "";
+                const parsedDate = dayjs(dateString);
+                setSelectedDate(parsedDate);
+                setAllCashin(response?.incomeDetails);
+              } catch (err) {
+                console.error(err);
+              } finally {
+                setIsLoading(false);
+              }
+            };
+            fetchData();
+          }
+        } else {
+          setIsLoading(false);
+        } // Jika sudah login, selesai loading
       }
     }
-  }, [id, dummyData, dummyDataDetails]);
+  }, [id, userId, tokens]);
 
   useEffect(() => {
     if (openDialogAdd == false) {
@@ -124,7 +138,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
       setValueIncomeAmount("0,00");
     } else {
       if (cashin) {
-        setValueDesc(cashin?.desc);
+        setValueDesc(cashin?.description);
         const formatAmount = formatNumberToIDR(cashin?.amount);
         setValueIncomeAmount(formatAmount);
       }
@@ -159,45 +173,45 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
     setOpenDialogAdd(true);
   };
 
-  const handleEdit = (data: CashOutInterface) => {
+  const handleEdit = (data: IncomeDetailsFormInterface) => {
     setCashin(data);
     setOpenDialogAdd(true);
     handleMenuClose();
   };
 
-  const handleDeleteClick = (data?: CashOutInterface) => {
+  const handleDeleteClick = (data?: IncomeDetailsFormInterface) => {
     setCashin(data);
     setOpenDialog(true);
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data?: CashOutInterface) => {
-
+  const handleDeleteConfirm = (data?: IncomeDetailsFormInterface) => {
     if (data) {
       setAllCashin((prevCashin) =>
-        prevCashin.filter((item) => item.id !== data.id)
+        prevCashin.filter((item) => item._id !== data._id)
       );
     }
 
     setOpenDialog(false);
   };
 
-  const handleSubmitCashOut = (data?: CashOutInterface) => {
+  const handleSubmitCashOut = (data?: IncomeDetailsFormInterface) => {
     if (!data) {
       const newCashin = {
         id: crypto.randomUUID(),
-        desc: valueDesc,
+        description: valueDesc,
         amount: parseFormattedNumber(valueIncomeAmount),
+        date: selectedDate ? selectedDate.toDate() : new Date(),
       };
       setAllCashin([...allCashin, newCashin]);
       setCashin(undefined);
     } else {
       setAllCashin((prevCashin) =>
         prevCashin.map((item) =>
-          item.id === data.id
+          item._id === data._id
             ? {
                 ...item,
-                desc: valueDesc,
+                description: valueDesc,
                 amount: parseFormattedNumber(valueIncomeAmount),
               }
             : item
@@ -208,7 +222,54 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
     setOpenDialogAdd(false);
   };
 
-  return (
+  const handleSubmitData = () => {
+    if (id) {
+      const dataObj = {
+        title: valueTitle,
+        amount: valueAmount,
+        date: selectedDate ? selectedDate.toDate() : new Date(),
+        userId: userId,
+        incomeDetails: allCashin,
+      };
+      const submitData = async () => {
+        try {
+          const response = await updateIncome(id, userId, dataObj);
+          router.push(`/main/income`);
+        } catch (err) {
+          console.error(err);
+        }
+        // finally {
+        //   setIsLoading(false);
+        // }
+      };
+      submitData();
+    } else {
+      const dataObj = {
+        title: valueTitle,
+        amount: valueAmount,
+        date: selectedDate ? selectedDate.toDate() : new Date(),
+        userId: userId,
+        incomeDetails: allCashin,
+      };
+      const submitData = async () => {
+        try {
+          const response = await createIncomeList(dataObj);
+          router.push(`/main/income`);
+        } catch (err) {
+          console.error(err);
+        }
+        // finally {
+        //   setIsLoading(false);
+        // }
+      };
+      submitData();
+    }
+
+  };
+
+  return isLoading === true ? (
+    <Loader />
+  ) : (
     <div>
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
         Income Form
@@ -308,9 +369,9 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
               </Box>
             ) : (
               <List>
-                {allCashin?.map((x) => (
+                {allCashin?.map((x, index) => (
                   <ListItem
-                    key={x?.id}
+                    key={x?._id || `cashin-${index}`}
                     alignItems="flex-start"
                     sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
                     secondaryAction={
@@ -318,7 +379,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                         <>
                           <IconButton
                             edge="end"
-                            onClick={(e) => handleMenuOpen(e, x.id!)}
+                            onClick={(e) => handleMenuOpen(e, x._id!)}
                           >
                             <MoreVertIcon />
                           </IconButton>
@@ -327,7 +388,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                             anchorEl={menuAnchor.anchorEl}
                             open={
                               menuAnchor.anchorEl !== null &&
-                              menuAnchor.id === x.id
+                              menuAnchor.id === x._id
                             }
                             onClose={handleMenuClose}
                           >
@@ -358,7 +419,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                               variant="body2"
                               fontWeight="bold"
                             >
-                              {x?.desc}
+                              {x?.description}
                             </Typography>
                           </Box>
                         </Typography>
@@ -398,7 +459,12 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
         {mode != "view" ? (
           <>
             <Box width="50%">
-              <Button fullWidth variant="contained" sx={{ bgcolor: "#904cee" }} onClick={handleBackPage}>
+              <Button
+                fullWidth
+                variant="contained"
+                sx={{ bgcolor: "#904cee" }}
+                onClick={handleBackPage}
+              >
                 Cancel
               </Button>
             </Box>
@@ -410,13 +476,19 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                 fullWidth
                 variant="contained"
                 sx={{ bgcolor: "#904cee" }}
+                onClick={handleSubmitData}
               >
-                Save
+                {id ? 'Update' : 'Save'}
               </Button>
             </Box>
           </>
         ) : (
-          <Button fullWidth variant="contained" sx={{ bgcolor: "#904cee" }} onClick={handleBackPage}>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ bgcolor: "#904cee" }}
+            onClick={handleBackPage}
+          >
             Back
           </Button>
         )}
@@ -445,7 +517,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       <Dialog
         open={openDialogAdd}
         onClose={() => setOpenDialogAdd(false)}

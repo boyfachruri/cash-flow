@@ -20,9 +20,12 @@ import {
 //   ResponsiveContainer,
 // } from "recharts";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
-import { isAuthenticated } from '@/utils/auth';
+import { isAuthenticated } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import axios from "axios";
+import { fetchDashboard } from "@/utils/dashboard";
+import Loader from "@/components/loader";
 
 // Contoh Data Dummy
 const initialData = [
@@ -40,27 +43,52 @@ const initialData = [
   { month: "December  ", income: 6000000, expenses: 3500000 },
 ];
 
+interface DashboardDataInterface {
+  calculateIncome: number;
+  calculateExpenses: number;
+  calculateBalance: number;
+}
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  
+  const [balanceData, setBalanceData] = useState(0);
+  const [incomeData, setIncomeData] = useState(0);
+  const [expensesData, setExpensesData] = useState(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const userData = localStorage.getItem("user");
     if (!isAuthenticated()) {
       // Redirect hanya di klien
-      router.push('/login');
+      router.push("/login");
     } else {
-      setIsLoading(false); // Jika sudah login, selesai loading
+      if (userData && token) {
+        const user = JSON.parse(userData);
+        const fetchData = async () => {
+          try {
+            const response = await fetchDashboard(token, user?._id);
+            setBalanceData(response?.calculateBalance);
+            setIncomeData(response?.calculateIncome);
+            setExpensesData(response?.calculateExpenses);
+          } catch (err) {
+            setError("Failed to fetch dashboard data");
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchData();
+      } // Jika sudah login, selesai loading
     }
-  }, []); 
+  }, []);
   // const [data, setData] = useState(initialData);
 
   // Hitung total pemasukan, pengeluaran, dan saldo bersih
-  const totalIncome = initialData.reduce((sum, item) => sum + item.income, 0);
-  const totalExpenses = initialData.reduce((sum, item) => sum + item.expenses, 0);
-  const netBalance = totalIncome - totalExpenses;
 
-  return (
+  return isLoading == true ? (
+    <Loader />
+  ) : (
     <Box>
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
         Dashboard
@@ -74,7 +102,7 @@ export default function DashboardScreen() {
                 Net Balance
               </Typography>
               <Typography variant="h6" color="white">
-                {formatCurrencyIDR(netBalance)}
+                {formatCurrencyIDR(balanceData)}
               </Typography>
             </CardContent>
           </Card>
@@ -88,7 +116,7 @@ export default function DashboardScreen() {
                 Total Income
               </Typography>
               <Typography variant="h6" color="white">
-                {formatCurrencyIDR(totalIncome)}
+                {formatCurrencyIDR(incomeData)}
               </Typography>
             </CardContent>
           </Card>
@@ -102,7 +130,7 @@ export default function DashboardScreen() {
                 Total Expenses
               </Typography>
               <Typography variant="h6" color="white">
-                {formatCurrencyIDR(totalExpenses)}
+                {formatCurrencyIDR(expensesData)}
               </Typography>
             </CardContent>
           </Card>
@@ -110,7 +138,7 @@ export default function DashboardScreen() {
       </Grid>
 
       {/* Grafik */}
-      <Box sx={{ marginTop: 4 }} boxShadow={1}>
+      {/* <Box sx={{ marginTop: 4 }} boxShadow={1}>
         <Box marginLeft={2} paddingTop={2}>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Monthly Financial Summary
@@ -163,7 +191,7 @@ export default function DashboardScreen() {
             ))}
           </List>
         </Box>
-      </Box>
+      </Box> */}
 
       {/* <Box sx={{ marginTop: 4, height: 300 }}>
         <Typography variant="h6" gutterBottom>

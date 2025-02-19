@@ -38,8 +38,10 @@ const UserList = () => {
   });
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userId, setUserId] = useState("");
+  const [tokens, settokens] = useState("");
   const [users, setUsers] = useState<UserInterface[]>([]);
-  const [error, setError] = useState<string | null>(null); 
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -48,7 +50,7 @@ const UserList = () => {
     if (userData) {
       const user = JSON.parse(userData);
       setRole(user?.role || "user");
-
+      setUserId(user?.id);
       // Jika bukan admin, redirect ke dashboard
       if (user.role !== "admin") {
         router.replace("/main/dashboard");
@@ -60,18 +62,19 @@ const UserList = () => {
 
   useEffect(() => {
     const getUserData = async () => {
-      const token = localStorage.getItem('access_token'); // Ambil token dari localStorage
+      const token = localStorage.getItem("access_token"); // Ambil token dari localStorage
       if (token) {
         try {
-          const usersData = await fetchUser(token); // Panggil fetchUser untuk mengambil data pengguna
+          const usersData = await fetchUser(token);
+          settokens(token); // Panggil fetchUser untuk mengambil data pengguna
           setUsers(usersData); // Set data pengguna ke state
         } catch (error: any) {
-          setError('Failed to fetch user data');
+          setError("Failed to fetch user data");
         } finally {
           setLoading(false); // Set loading ke false setelah data diambil
         }
       } else {
-        setError('Token not found');
+        setError("Token not found");
         setLoading(false);
       }
     };
@@ -151,93 +154,97 @@ const UserList = () => {
       {/* </div> */}
 
       <List>
-        
-        { loading ? <Loader /> :
-        filteredData?.map((x) => (
-          <ListItem
-            key={x?._id}
-            alignItems="flex-start"
-            sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
-            secondaryAction={
-              <>
-                <IconButton
-                  edge="end"
-                  onClick={(e) => handleMenuOpen(e, x._id!)}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-                <Menu
-                  anchorEl={menuAnchor.anchorEl}
-                  open={menuAnchor.anchorEl !== null && menuAnchor.id === x._id}
-                  onClose={handleMenuClose}
-                >
-                  <MenuItem onClick={() => handleView(x)}>
-                    <Typography component="span" variant="body2">
-                      View
-                    </Typography>
-                  </MenuItem>
-                  <MenuItem onClick={() => handleEdit(x)}>
-                    <Typography component="span" variant="body2">
-                      Edit
-                    </Typography>
-                  </MenuItem>
-                  {x?.status === "Active" && (
-                    <MenuItem
-                      onClick={handleDeleteClick}
-                      sx={{ color: "error.main" }}
-                    >
+        {loading ? (
+          <Loader />
+        ) : (
+          filteredData?.map((x) => (
+            <ListItem
+              key={x?._id}
+              alignItems="flex-start"
+              sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
+              secondaryAction={
+                <>
+                  <IconButton
+                    edge="end"
+                    onClick={(e) => handleMenuOpen(e, x._id!)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={menuAnchor.anchorEl}
+                    open={
+                      menuAnchor.anchorEl !== null && menuAnchor.id === x._id
+                    }
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem onClick={() => handleView(x)}>
                       <Typography component="span" variant="body2">
-                        Inactive
+                        View
                       </Typography>
                     </MenuItem>
-                  )}
-                </Menu>
-              </>
-            }
-          >
-            <ListItemText
-              primary={
-                <Typography component="div">
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      fontWeight="bold"
-                    >
-                      {x?.fullname}
-                    </Typography>
-                    <Typography component="span" variant="body2">
-                      {DateFormatter(String(x?.date))}
-                    </Typography>
-                  </Box>
-                </Typography>
+                    <MenuItem onClick={() => handleEdit(x)}>
+                      <Typography component="span" variant="body2">
+                        Edit
+                      </Typography>
+                    </MenuItem>
+                    {x?.status === "Active" && (
+                      <MenuItem
+                        onClick={handleDeleteClick}
+                        sx={{ color: "error.main" }}
+                      >
+                        <Typography component="span" variant="body2">
+                          Inactive
+                        </Typography>
+                      </MenuItem>
+                    )}
+                  </Menu>
+                </>
               }
-              secondary={
-                <Typography component="div">
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      //   fontWeight="bold"
-                    >
-                      {x?.role}
-                    </Typography>
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      color={x?.status === "Inactive" ? "error" : "success"}
-                    >
-                      {x?.status}
-                    </Typography>
-                    {/* <Typography component="span" variant="body2" >
+            >
+              <ListItemText
+                primary={
+                  <Typography component="div">
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        fontWeight="bold"
+                      >
+                        {x?.fullname}
+                      </Typography>
+                      <Typography component="span" variant="body2">
+                        {DateFormatter(String(x?.date))}
+                      </Typography>
+                    </Box>
+                  </Typography>
+                }
+                secondary={
+                  <Typography component="div">
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        //   fontWeight="bold"
+                      >
+                        {x?.role}
+                      </Typography>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color={x?.status === "Inactive" ? "error" : "success"}
+                      >
+                        {x?.status}
+                      </Typography>
+                      {/* <Typography component="span" variant="body2" >
                       {x?.tanggal}
                     </Typography> */}
-                  </Box>
-                </Typography>
-              }
-            />
-          </ListItem>
-        ))}
+                    </Box>
+                  </Typography>
+                }
+              />
+            </ListItem>
+          ))
+        )}
       </List>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Inactive Confirmation</DialogTitle>

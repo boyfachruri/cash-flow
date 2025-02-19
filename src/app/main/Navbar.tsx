@@ -19,13 +19,26 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
-import { Divider, Typography, Button, Menu, MenuItem } from "@mui/material";
+import {
+  Divider,
+  Typography,
+  Button,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import PeopleIcon from "@mui/icons-material/People";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useState } from "react";
+import { isAuthenticated } from "@/utils/auth";
 
 const drawerWidth = 240;
 
@@ -83,12 +96,12 @@ const listApp = [
     link: "/main/expenses",
     icons: <ShoppingCartCheckoutIcon />,
   },
-  {
-    id: 4,
-    name: "Financial Overview",
-    link: "/main/financial-overview",
-    icons: <CalculateIcon />,
-  },
+  // {
+  //   id: 4,
+  //   name: "Financial Overview",
+  //   link: "/main/financial-overview",
+  //   icons: <CalculateIcon />,
+  // },
 ];
 
 export default function Navbar({ children }: { children: React.ReactNode }) {
@@ -101,6 +114,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // State untuk Menu
   const [openMenu, setOpenMenu] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -112,8 +126,24 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
       const user = JSON.parse(userData);
       setRole(user?.role || "user");
       setfullName(user?.fullname);
-      setUserId(user?._id)
+      setUserId(user?._id);
     }
+  }, []);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      if (!isAuthenticated()) {
+        setOpenSnackbar(true);
+        setTimeout(() => {
+          router.replace("/login");
+        }, 3000); // Redirect setelah 3 detik
+      }
+    };
+
+    checkAuth();
+    const interval = setInterval(checkAuth, 10000); // Cek setiap 10 detik
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleClickUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -170,12 +200,16 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
             <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
               {" "}
               <ListItemIcon>
-                <AccountCircleIcon />&nbsp; Account
+                <AccountCircleIcon />
+                &nbsp; Account
               </ListItemIcon>
             </MenuItem>
-            <MenuItem onClick={handleLogout}><ListItemIcon>
-            <ExitToAppIcon />&nbsp; Logout
-              </ListItemIcon></MenuItem>
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon>
+                <ExitToAppIcon />
+                &nbsp; Logout
+              </ListItemIcon>
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
@@ -316,6 +350,12 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         <DrawerHeader />
         {children}
       </Main>
+
+      <Snackbar open={openSnackbar} autoHideDuration={3000}>
+        <Alert severity="warning" variant="filled">
+          Your session has expired. Please log in again.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

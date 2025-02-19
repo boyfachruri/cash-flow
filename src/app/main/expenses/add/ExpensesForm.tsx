@@ -25,9 +25,15 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import dayjs, { Dayjs } from "dayjs";
 import NumberTextField from "@/components/NumberTextField";
-import { dummyData, dummyDataDetails } from "../data";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/utils/auth";
+import {
+  createExpensesList,
+  fetchExpensesListById,
+  ExpensesDetailsFormInterface,
+  updateExpenses,
+} from "@/utils/expenses";
+import Loader from "@/components/loader";
 
 interface ExpensesFormInterface {
   id?: string;
@@ -36,18 +42,17 @@ interface ExpensesFormInterface {
 
 interface CashOutInterface {
   id?: string;
-  expenseId?: string;
+  expensesId?: string;
   desc: string;
   amount: number;
 }
 
 const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
-  const router = useRouter();  
- const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
+  const router = useRouter();
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
   const [valueTitle, setValueTitle] = useState<string>("");
   const [valueDesc, setValueDesc] = useState<string>("");
-  const [valueExpensesAmount, setValueExpensesAmount] =
-    useState<string>("0,00");
+  const [valueExpensesAmount, setValueExpensesAmount] = useState<string>("0,00");
   const [valueAmount, setValueAmount] = useState<number>(0);
   const [menuAnchor, setMenuAnchor] = useState<{
     anchorEl: HTMLElement | null;
@@ -58,24 +63,16 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   });
   const [openDialog, setOpenDialog] = useState(false);
   const [openDialogAdd, setOpenDialogAdd] = useState(false);
-
-    const [isLoading, setIsLoading] = useState(true);
-  
-      useEffect(() => {
-        if (!isAuthenticated()) {
-          // Redirect hanya di klien
-          router.push('/login');
-        } else {
-          setIsLoading(false); // Jika sudah login, selesai loading
-        }
-      }, []); 
+  const [userId, setUserId] = useState("");
+  const [tokens, setTokens] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   function parseFormattedNumber(str: string) {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
   }
 
-  const [cashout, setCashout] = useState<CashOutInterface>();
-  const [allCashout, setAllCashout] = useState<CashOutInterface[]>([]);
+  const [cashin, setCashin] = useState<ExpensesDetailsFormInterface>();
+  const [allCashin, setAllCashin] = useState<ExpensesDetailsFormInterface[]>([]);
 
   const formatNumberToIDR = (num: number): string => {
     return new Intl.NumberFormat("id-ID", {
@@ -84,55 +81,73 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
     }).format(num);
   };
 
-  const calculateTotalCashout = (data: CashOutInterface[]) => {
-    const totalAmount = data.reduce((total, cashout) => {
-      return total + (cashout.amount || 0); // Pastikan cashout.amount ada, jika tidak default ke 0
+  const calculateTotalCashin = (data: ExpensesDetailsFormInterface[]) => {
+    const totalAmount = data.reduce((total, cashin) => {
+      return total + (cashin.amount || 0); // Pastikan cashin.amount ada, jika tidak default ke 0
     }, 0);
 
     setValueAmount(totalAmount);
   };
-  
+
   const handleBackPage = () => {
     router.push(`/main/expenses`);
-  }
+  };
+
   useEffect(() => {
-    if (id) {
-      if (dummyData) {
-        const findExpensesData = dummyData?.find((x) => x?.id === id);
-        setValueTitle(findExpensesData?.title || "");
-        const dateString = findExpensesData?.tanggal || "";
-        const parsedDate = dayjs(dateString);
-        setSelectedDate(parsedDate);
-  
-        if (dummyDataDetails) {
-          const filterAllCashout = dummyDataDetails?.filter(
-            (x) => x?.expenseId === id
-          );
-          setAllCashout(filterAllCashout);
-        }
+    const userData = localStorage.getItem("user");
+    const token = localStorage.getItem("access_token");
+    if (userData && token) {
+      const user = JSON.parse(userData);
+      setUserId(user?._id);
+      setTokens(token);
+      if (!isAuthenticated()) {
+        // Redirect hanya di klien
+        router.push("/login");
+      } else {
+        if (id) {
+          if (userId && tokens) {
+            const fetchData = async () => {
+              try {
+                const response = await fetchExpensesListById(tokens, id, userId);
+                setValueTitle(response?.title || "");
+                const dateString = response?.date || "";
+                const parsedDate = dayjs(dateString);
+                setSelectedDate(parsedDate);
+                setAllCashin(response?.expensesDetails);
+              } catch (err) {
+                console.error(err);
+              } finally {
+                setIsLoading(false);
+              }
+            };
+            fetchData();
+          }
+        } else {
+          setIsLoading(false);
+        } // Jika sudah login, selesai loading
       }
     }
-  }, [id, dummyData, dummyDataDetails]); 
+  }, [id, userId, tokens]);
 
   useEffect(() => {
     if (openDialogAdd == false) {
       if (openDialog == false) {
-        setCashout(undefined);
+        setCashin(undefined);
       }
       setValueDesc("");
       setValueExpensesAmount("0,00");
     } else {
-      if (cashout) {
-        setValueDesc(cashout?.desc);
-        const formatAmount = formatNumberToIDR(cashout?.amount);
+      if (cashin) {
+        setValueDesc(cashin?.description);
+        const formatAmount = formatNumberToIDR(cashin?.amount);
         setValueExpensesAmount(formatAmount);
       }
     }
-  }, [openDialogAdd, cashout, openDialog]);
+  }, [openDialogAdd, cashin, openDialog]);
 
   useEffect(() => {
-    calculateTotalCashout(allCashout);
-  }, [allCashout]);
+    calculateTotalCashin(allCashin);
+  }, [allCashin]);
 
   const handlDescChange: React.ChangeEventHandler<
     HTMLInputElement | HTMLTextAreaElement
@@ -156,60 +171,105 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
 
   const handleAdd = () => {
     setOpenDialogAdd(true);
-    //   router.push(`/expenses/add`);
   };
 
-  const handleEdit = (data: CashOutInterface) => {
-    setCashout(data);
+  const handleEdit = (data: ExpensesDetailsFormInterface) => {
+    setCashin(data);
     setOpenDialogAdd(true);
-    // router.push(`/expenses/edit/${data.id}`);
     handleMenuClose();
   };
 
-  const handleDeleteClick = (data?: CashOutInterface) => {
-    setCashout(data);
+  const handleDeleteClick = (data?: ExpensesDetailsFormInterface) => {
+    setCashin(data);
     setOpenDialog(true);
     handleMenuClose();
   };
 
-  const handleDeleteConfirm = (data?: CashOutInterface) => {
-
+  const handleDeleteConfirm = (data?: ExpensesDetailsFormInterface) => {
     if (data) {
-      setAllCashout((prevCashout) =>
-        prevCashout.filter((item) => item.id !== data.id)
+      setAllCashin((prevCashin) =>
+        prevCashin.filter((item) => item._id !== data._id)
       );
     }
 
     setOpenDialog(false);
   };
 
-  const handleSubmitCashOut = (data?: CashOutInterface) => {
+  const handleSubmitCashOut = (data?: ExpensesDetailsFormInterface) => {
     if (!data) {
-      const newCashout = {
+      const newCashin = {
         id: crypto.randomUUID(),
-        desc: valueDesc,
+        description: valueDesc,
         amount: parseFormattedNumber(valueExpensesAmount),
+        date: selectedDate ? selectedDate.toDate() : new Date(),
       };
-      setAllCashout([...allCashout, newCashout]);
-      setCashout(undefined);
+      setAllCashin([...allCashin, newCashin]);
+      setCashin(undefined);
     } else {
-      setAllCashout((prevCashout) =>
-        prevCashout.map((item) =>
-          item.id === data.id
+      setAllCashin((prevCashin) =>
+        prevCashin.map((item) =>
+          item._id === data._id
             ? {
                 ...item,
-                desc: valueDesc,
+                description: valueDesc,
                 amount: parseFormattedNumber(valueExpensesAmount),
               }
             : item
         )
       );
-      setCashout(undefined);
+      setCashin(undefined);
     }
     setOpenDialogAdd(false);
   };
 
-  return (
+  const handleSubmitData = () => {
+    if (id) {
+      const dataObj = {
+        title: valueTitle,
+        amount: valueAmount,
+        date: selectedDate ? selectedDate.toDate() : new Date(),
+        userId: userId,
+        expensesDetails: allCashin,
+      };
+      const submitData = async () => {
+        try {
+          const response = await updateExpenses(id, userId, dataObj);
+          router.push(`/main/expenses`);
+        } catch (err) {
+          console.error(err);
+        }
+        // finally {
+        //   setIsLoading(false);
+        // }
+      };
+      submitData();
+    } else {
+      const dataObj = {
+        title: valueTitle,
+        amount: valueAmount,
+        date: selectedDate ? selectedDate.toDate() : new Date(),
+        userId: userId,
+        expensesDetails: allCashin,
+      };
+      const submitData = async () => {
+        try {
+          const response = await createExpensesList(dataObj);
+          router.push(`/main/expenses`);
+        } catch (err) {
+          console.error(err);
+        }
+        // finally {
+        //   setIsLoading(false);
+        // }
+      };
+      submitData();
+    }
+
+  };
+
+  return isLoading === true ? (
+    <Loader />
+  ) : (
     <div>
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
         Expenses Form
@@ -260,7 +320,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               sx={{ bgcolor: "#904cee" }}
               onClick={handleAdd}
             >
-              Add Cashout
+              Add Cash-out
             </Button>
           </Box>
         )}
@@ -283,7 +343,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               >
                 <Box>
                   <Typography variant="body1" paddingTop={2} fontWeight="bold">
-                    Cashout List
+                    Cash-out List
                   </Typography>
                 </Box>
               </Box>
@@ -296,7 +356,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               </Box>
             </Box>
 
-            {allCashout?.length === 0 ? (
+            {allCashin?.length === 0 ? (
               <Box
                 display="flex"
                 justifyContent="center"
@@ -309,9 +369,9 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               </Box>
             ) : (
               <List>
-                {allCashout?.map((x) => (
+                {allCashin?.map((x, index) => (
                   <ListItem
-                    key={x?.id}
+                    key={x?._id || `cashin-${index}`}
                     alignItems="flex-start"
                     sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
                     secondaryAction={
@@ -319,7 +379,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                         <>
                           <IconButton
                             edge="end"
-                            onClick={(e) => handleMenuOpen(e, x.id!)}
+                            onClick={(e) => handleMenuOpen(e, x._id!)}
                           >
                             <MoreVertIcon />
                           </IconButton>
@@ -328,7 +388,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                             anchorEl={menuAnchor.anchorEl}
                             open={
                               menuAnchor.anchorEl !== null &&
-                              menuAnchor.id === x.id
+                              menuAnchor.id === x._id
                             }
                             onClose={handleMenuClose}
                           >
@@ -359,7 +419,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                               variant="body2"
                               fontWeight="bold"
                             >
-                              {x?.desc}
+                              {x?.description}
                             </Typography>
                           </Box>
                         </Typography>
@@ -399,7 +459,12 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
         {mode != "view" ? (
           <>
             <Box width="50%">
-              <Button fullWidth variant="contained" sx={{ bgcolor: "#904cee" }} onClick={handleBackPage}>
+              <Button
+                fullWidth
+                variant="contained"
+                sx={{ bgcolor: "#904cee" }}
+                onClick={handleBackPage}
+              >
                 Cancel
               </Button>
             </Box>
@@ -411,13 +476,19 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                 fullWidth
                 variant="contained"
                 sx={{ bgcolor: "#904cee" }}
+                onClick={handleSubmitData}
               >
-                Save
+                {id ? 'Update' : 'Save'}
               </Button>
             </Box>
           </>
         ) : (
-          <Button fullWidth variant="contained" sx={{ bgcolor: "#904cee" }} onClick={handleBackPage}>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ bgcolor: "#904cee" }}
+            onClick={handleBackPage}
+          >
             Back
           </Button>
         )}
@@ -438,7 +509,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
             Cancel
           </Button>
           <Button
-            onClick={() => handleDeleteConfirm(cashout)}
+            onClick={() => handleDeleteConfirm(cashin)}
             variant="contained"
             sx={{ bgcolor: "#904cee" }}
           >
@@ -446,13 +517,14 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog
         open={openDialogAdd}
         onClose={() => setOpenDialogAdd(false)}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Cashout</DialogTitle>
+        <DialogTitle>Cash-out</DialogTitle>
         <DialogContent>
           <Box width="100%" display="flex" gap={3} flexDirection="column">
             <Box width="100%">
@@ -485,7 +557,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
             Cancel
           </Button>
           <Button
-            onClick={() => handleSubmitCashOut(cashout)}
+            onClick={() => handleSubmitCashOut(cashin)}
             variant="contained"
             sx={{ bgcolor: "#904cee" }}
             disabled={valueDesc && valueExpensesAmount != "0,00" ? false : true}
