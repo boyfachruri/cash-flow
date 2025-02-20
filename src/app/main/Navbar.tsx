@@ -130,7 +130,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // State untuk Menu
   const [openMenu, setOpenMenu] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [balanceData, setBalanceData] = useState(0);
+  const [walletData, setWalletData] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -152,7 +152,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         const fetchData = async () => {
           try {
             const response = await fetchDashboard(token, user?._id);
-            setBalanceData(response?.calculateBalance);
+            setWalletData(response?.calculateWallet);
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
@@ -241,7 +241,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                   sx={{ mr: 1, color: "#904cee" }}
                 />
                 <Typography variant="body2" color="#904cee" fontWeight="bold">
-                  {formatCurrencyIDR(balanceData)}
+                  {formatCurrencyIDR(walletData)}
                 </Typography>
                 {/* </Box> */}
               </MenuItem>
