@@ -116,7 +116,6 @@ const WalletList = () => {
       } // Jika sudah login, selesai loading
     }
   }, []);
-  
 
   const handleSearch = (query: string) => {
     setSearchQuery(query.toLowerCase());
@@ -177,17 +176,16 @@ const WalletList = () => {
 
   useEffect(() => {
     if (valueAmount && balance) {
-      const parseAmount = parseFormattedNumber(valueAmount)
-      const parseBalance = parseFormattedNumber(balance)
+      const parseAmount = parseFormattedNumber(valueAmount);
+      const parseBalance = parseFormattedNumber(balance);
 
       if (parseAmount > parseBalance) {
-        setDisabledSave(true)
+        setDisabledSave(true);
       } else {
-        setDisabledSave(false)
+        setDisabledSave(false);
       }
     }
-  }, [valueAmount, balance])
-  
+  }, [valueAmount, balance]);
 
   const handleDeleteConfirm = () => {
     setIsLoading(true);
@@ -354,25 +352,16 @@ const WalletList = () => {
                   primary={
                     <Typography component="div">
                       <Box display="flex" justifyContent="space-between">
-                        <Typography component="span" variant="body2">
-                          {DateFormatter(String(x?.date))}
-                        </Typography>
-                      </Box>
-                    </Typography>
-                  }
-                  secondary={
-                    <Typography component="div">
-                      <Box display="flex" justifyContent="space-between">
                         <Typography
                           component="span"
-                          color="success"
+                          color="#904cee"
                           variant="body2"
                         >
                           {formatCurrencyIDR(x?.amount)}
                         </Typography>
-                        {/* <Typography component="span" variant="body2" >
-                  {x?.tanggal}
-                </Typography> */}
+                        <Typography component="span" variant="body2">
+                          {DateFormatter(String(x?.date))}
+                        </Typography>
                       </Box>
                     </Typography>
                   }
@@ -465,7 +454,11 @@ const WalletList = () => {
               onClick={() => handleSubmit()}
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
-              disabled={disabledSave == false && selectedDate && valueAmount != "0,00" ? false : true}
+              disabled={
+                disabledSave == false && selectedDate && valueAmount != "0,00"
+                  ? false
+                  : true
+              }
             >
               Save
             </Button>
