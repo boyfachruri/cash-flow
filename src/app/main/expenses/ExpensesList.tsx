@@ -52,7 +52,8 @@ const ExpensesList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [tokens, setTokens] = useState("");
   const [expensesList, setExpensesList] = useState<ExpensesListInterface[]>([]);
-  const [expensesListById, setExpensesListById] = useState<ExpensesListInterface>();
+  const [expensesListById, setExpensesListById] =
+    useState<ExpensesListInterface>();
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -103,18 +104,38 @@ const ExpensesList = () => {
   const handleMenuClose = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
-  const handleAdd = () => {
-    router.push(`/main/expenses/add`);
+  const handleAdd = async () => {
+    setIsLoading(true);
+
+    try {
+      await router.push(`/main/expenses/add`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Aksi untuk pindah screen
-  const handleView = (data: ExpensesListInterface) => {
-    router.push(`/main/expenses/view/${data._id}`);
+  const handleView = async (data: ExpensesListInterface) => {
+    setIsLoading(true);
+
+    try {
+      await router.push(`/main/expenses/view/${data._id}`);
+    } finally {
+      setIsLoading(false);
+    }
+
     handleMenuClose();
   };
 
-  const handleEdit = (data: ExpensesListInterface) => {
-    router.push(`/main/expenses/edit/${data._id}`);
+  const handleEdit = async (data: ExpensesListInterface) => {
+    setIsLoading(true);
+
+    try {
+      await router.push(`/main/expenses/edit/${data._id}`);
+    } finally {
+      setIsLoading(false);
+    }
+
     handleMenuClose();
   };
 
@@ -126,6 +147,7 @@ const ExpensesList = () => {
   };
 
   const handleDeleteConfirm = () => {
+    setIsLoading(true);
     const deleteData = async () => {
       try {
         const response = await deleteExpenses(
@@ -141,159 +163,159 @@ const ExpensesList = () => {
         setExpensesList(responseData);
       } catch (err) {
         console.error(err);
+      } finally {
+        setIsLoading(false);
       }
-      // finally {
-      //   setIsLoading(false);
-      // }
     };
     deleteData();
     setOpenDialog(false);
   };
 
-  return isLoading == true ? (
-    <Loader />
-  ) : (
-    <div>
-      {/* <div> */}
-      <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        Expenses List
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 9, md: 11 }}>
-          <Search onSearch={handleSearch} />
-        </Grid>
-        <Grid size={{ xs: 3, md: 1 }} textAlign="right">
-          <Button
-            fullWidth
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-            onClick={handleAdd}
-          >
-            Add
-          </Button>
-        </Grid>
-      </Grid>
-      {/* </div> */}
-
-      {filteredData?.length === 0 ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height={100}
-        >
-          <Typography variant="body2" color="textSecondary">
-            No Data
-          </Typography>
-        </Box>
-      ) : (
-        <List>
-          {filteredData?.map((x) => (
-            <ListItem
-              key={x?._id}
-              alignItems="flex-start"
-              sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
-              secondaryAction={
-                <>
-                  <IconButton
-                    edge="end"
-                    onClick={(e) => handleMenuOpen(e, x._id!)}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
-                  <Menu
-                    anchorEl={menuAnchor.anchorEl}
-                    open={
-                      menuAnchor.anchorEl !== null && menuAnchor.id === x._id
-                    }
-                    onClose={handleMenuClose}
-                  >
-                    <MenuItem onClick={() => handleView(x)}>
-                      <Typography component="span" variant="body2">
-                        View
-                      </Typography>
-                    </MenuItem>
-                    <MenuItem onClick={() => handleEdit(x)}>
-                      <Typography component="span" variant="body2">
-                        Edit
-                      </Typography>
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleDeleteClick(x)}
-                      sx={{ color: "error.main" }}
-                    >
-                      <Typography component="span" variant="body2">
-                        Delete
-                      </Typography>
-                    </MenuItem>
-                  </Menu>
-                </>
-              }
+  return (
+    <>
+      {isLoading == true && <Loader />}
+      <div>
+        {/* <div> */}
+        <Typography variant="h6" paddingBottom={3} fontWeight="bold">
+          Expenses List
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 9, md: 11 }}>
+            <Search onSearch={handleSearch} />
+          </Grid>
+          <Grid size={{ xs: 3, md: 1 }} textAlign="right">
+            <Button
+              fullWidth
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+              onClick={handleAdd}
             >
-              <ListItemText
-                primary={
-                  <Typography component="div">
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        fontWeight="bold"
+              Add
+            </Button>
+          </Grid>
+        </Grid>
+        {/* </div> */}
+
+        {filteredData?.length === 0 ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height={100}
+          >
+            <Typography variant="body2" color="textSecondary">
+              No Data
+            </Typography>
+          </Box>
+        ) : (
+          <List>
+            {filteredData?.map((x) => (
+              <ListItem
+                key={x?._id}
+                alignItems="flex-start"
+                sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
+                secondaryAction={
+                  <>
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => handleMenuOpen(e, x._id!)}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={menuAnchor.anchorEl}
+                      open={
+                        menuAnchor.anchorEl !== null && menuAnchor.id === x._id
+                      }
+                      onClose={handleMenuClose}
+                    >
+                      <MenuItem onClick={() => handleView(x)}>
+                        <Typography component="span" variant="body2">
+                          View
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem onClick={() => handleEdit(x)}>
+                        <Typography component="span" variant="body2">
+                          Edit
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleDeleteClick(x)}
+                        sx={{ color: "error.main" }}
                       >
-                        {x?.title}
-                      </Typography>
-                      <Typography component="span" variant="body2">
-                        {DateFormatter(String(x?.date))}
-                      </Typography>
-                    </Box>
-                  </Typography>
+                        <Typography component="span" variant="body2">
+                          Delete
+                        </Typography>
+                      </MenuItem>
+                    </Menu>
+                  </>
                 }
-                secondary={
-                  <Typography component="div">
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography
-                        component="span"
-                        color="error"
-                        variant="body2"
-                      >
-                        {formatCurrencyIDR(x?.amount)}
-                      </Typography>
-                      {/* <Typography component="span" variant="body2" >
+              >
+                <ListItemText
+                  primary={
+                    <Typography component="div">
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          fontWeight="bold"
+                        >
+                          {x?.title}
+                        </Typography>
+                        <Typography component="span" variant="body2">
+                          {DateFormatter(String(x?.date))}
+                        </Typography>
+                      </Box>
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography component="div">
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography
+                          component="span"
+                          color="error"
+                          variant="body2"
+                        >
+                          {formatCurrencyIDR(x?.amount)}
+                        </Typography>
+                        {/* <Typography component="span" variant="body2" >
                   {x?.tanggal}
                 </Typography> */}
-                    </Box>
-                  </Typography>
-                }
-              />
-            </ListItem>
-          ))}
-        </List>
-      )}
+                      </Box>
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Delete Confirmation</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setOpenDialog(false)}
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleDeleteConfirm()}
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+          <DialogTitle>Delete Confirmation</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setOpenDialog(false)}
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleDeleteConfirm()}
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </>
   );
 };
 

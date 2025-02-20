@@ -4,7 +4,9 @@ import TextField from "@mui/material/TextField";
 interface NumberTextFieldProps {
   label: string;
   value?: string;
+  color?: string;
   onChange?: (value: string) => void;
+  disabled?: boolean
 }
 
 const formatNumber = (value: string) => {
@@ -20,7 +22,7 @@ const formatNumber = (value: string) => {
   return `${formattedInteger},${decimalPart}`;
 };
 
-const NumberTextField: React.FC<NumberTextFieldProps> = ({ label, value, onChange }) => {
+const NumberTextField: React.FC<NumberTextFieldProps> = ({ label, value, onChange, color, disabled }) => {
   const [inputValue, setInputValue] = useState(value || "0,00");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,9 +42,11 @@ const NumberTextField: React.FC<NumberTextFieldProps> = ({ label, value, onChang
       label={label}
       variant="standard"
       fullWidth
+      color={color as "primary" | "secondary" | "error" | "info" | "success" | "warning"}
       value={inputValue}
       onChange={handleChange}
       onBlur={handleBlur}
+      disabled={disabled}
     />
   );
 };

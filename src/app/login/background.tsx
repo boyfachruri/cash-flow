@@ -6,7 +6,7 @@ const Background = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       style={{
-        backgroundImage: "url('/background.jpg')",
+        backgroundImage: "url('/background2.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

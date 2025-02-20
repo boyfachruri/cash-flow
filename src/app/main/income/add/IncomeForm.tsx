@@ -223,6 +223,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
   };
 
   const handleSubmitData = () => {
+    setIsLoading(true);
     if (id) {
       const dataObj = {
         title: valueTitle,
@@ -237,10 +238,9 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
           router.push(`/main/income`);
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoading(false);
         }
-        // finally {
-        //   setIsLoading(false);
-        // }
       };
       submitData();
     } else {
@@ -257,316 +257,327 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
           router.push(`/main/income`);
         } catch (err) {
           console.error(err);
+        } finally {
+          setIsLoading(false);
         }
-        // finally {
-        //   setIsLoading(false);
-        // }
       };
       submitData();
     }
-
   };
 
-  return isLoading === true ? (
-    <Loader />
-  ) : (
-    <div>
-      <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        Income Form
-      </Typography>
-      <Box
-        width="100%"
-        display="flex"
-        flexDirection={{ xs: "column", md: "row" }} // Column di mobile, row di desktop
-        gap={2} // Jarak antar box
-      >
-        <Box width={{ xs: "100%", md: "50%" }}>
-          {" "}
-          {/* Full width di mobile */}
-          <TextField
-            disabled={mode == "view" ? true : false}
-            fullWidth
-            id="standard-basic"
-            label="Title"
-            variant="standard"
-            value={valueTitle}
-            onChange={handleTitleChange}
-          />
-        </Box>
-        <Box width={{ xs: "100%", md: "50%" }}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <MobileDatePicker
-              format="DD/MM/YYYY"
-              slotProps={{
-                textField: {
-                  fullWidth: true, // ✅ Agar input full width
-                  variant: "standard", // ✅ Menggunakan variant "standard"
-                },
-              }}
-              label="Date"
-              value={selectedDate}
-              onChange={(newValue) => setSelectedDate(newValue)}
-              disabled={mode == "view" ? true : false}
-            />
-          </LocalizationProvider>
-        </Box>
-      </Box>
-      <Box width="100%">
-        {mode != "view" && (
-          <Box width="100%" marginTop={5}>
-            <Button
-              // fullWidth
-              variant="contained"
-              sx={{ bgcolor: "#904cee" }}
-              onClick={handleAdd}
-            >
-              Add Cash-in
-            </Button>
-          </Box>
-        )}
-
+  return (
+    <>
+      {isLoading === true && <Loader />}
+      <div>
+        <Typography variant="h6" paddingBottom={3} fontWeight="bold">
+          Income Form
+        </Typography>
         <Box
           width="100%"
-          //   border={1}
-          marginTop={3}
-          paddingBottom={2}
-          //   borderColor="#904cee"
-          boxShadow={1}
+          display="flex"
+          flexDirection={{ xs: "column", md: "row" }} // Column di mobile, row di desktop
+          gap={2} // Jarak antar box
         >
-          <Box marginRight={2} marginLeft={2} marginBottom={1} marginTop={1}>
-            <Box width="100%" display="flex">
-              <Box
-                width="50%"
-                display="flex"
-                alignItems="center"
-                justifyContent="flex-start"
-              >
-                <Box>
-                  <Typography variant="body1" paddingTop={2} fontWeight="bold">
-                    Cash-in List
-                  </Typography>
-                </Box>
-              </Box>
-              <Box width="50%" display="flex" justifyContent="flex-end">
-                <Box>
-                  <Typography variant="body2" paddingTop={2} fontWeight="bold">
-                    Total: {formatCurrencyIDR(valueAmount)}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            {allCashin?.length === 0 ? (
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height={100}
-              >
-                <Typography variant="body2" color="textSecondary">
-                  No Data
-                </Typography>
-              </Box>
-            ) : (
-              <List>
-                {allCashin?.map((x, index) => (
-                  <ListItem
-                    key={x?._id || `cashin-${index}`}
-                    alignItems="flex-start"
-                    sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
-                    secondaryAction={
-                      mode != "view" && (
-                        <>
-                          <IconButton
-                            edge="end"
-                            onClick={(e) => handleMenuOpen(e, x._id!)}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
-
-                          <Menu
-                            anchorEl={menuAnchor.anchorEl}
-                            open={
-                              menuAnchor.anchorEl !== null &&
-                              menuAnchor.id === x._id
-                            }
-                            onClose={handleMenuClose}
-                          >
-                            <MenuItem onClick={() => handleEdit(x)}>
-                              <Typography component="span" variant="body2">
-                                Edit
-                              </Typography>
-                            </MenuItem>
-                            <MenuItem
-                              onClick={() => handleDeleteClick(x)}
-                              sx={{ color: "error.main" }}
-                            >
-                              <Typography component="span" variant="body2">
-                                Delete
-                              </Typography>
-                            </MenuItem>
-                          </Menu>
-                        </>
-                      )
-                    }
-                  >
-                    <ListItemText
-                      primary={
-                        <Typography component="div">
-                          <Box display="flex" justifyContent="space-between">
-                            <Typography
-                              component="span"
-                              variant="body2"
-                              fontWeight="bold"
-                            >
-                              {x?.description}
-                            </Typography>
-                          </Box>
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography component="div">
-                          <Box display="flex" justifyContent="space-between">
-                            <Typography
-                              component="span"
-                              color="success"
-                              variant="body2"
-                            >
-                              {formatCurrencyIDR(x?.amount)}
-                            </Typography>
-                          </Box>
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            )}
+          <Box width={{ xs: "100%", md: "50%" }}>
+            {" "}
+            {/* Full width di mobile */}
+            <TextField
+              disabled={mode == "view" ? true : false}
+              fullWidth
+              id="standard-basic"
+              color="secondary"
+              label="Title"
+              variant="standard"
+              value={valueTitle}
+              onChange={handleTitleChange}
+            />
+          </Box>
+          <Box width={{ xs: "100%", md: "50%" }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <MobileDatePicker
+                format="DD/MM/YYYY"
+                slotProps={{
+                  textField: {
+                    color: "secondary",
+                    fullWidth: true, // ✅ Agar input full width
+                    variant: "standard", // ✅ Menggunakan variant "standard"
+                  },
+                }}
+                label="Date"
+                value={selectedDate}
+                onChange={(newValue) => setSelectedDate(newValue)}
+                disabled={mode == "view" ? true : false}
+              />
+            </LocalizationProvider>
           </Box>
         </Box>
-      </Box>
-      <Box
-        position="fixed"
-        bottom={0}
-        left={0}
-        width="100%"
-        bgcolor="white"
-        boxShadow={3}
-        p={2}
-        display="flex"
-        gap={2}
-      >
-        {mode != "view" ? (
-          <>
-            <Box width="50%">
+        <Box width="100%">
+          {mode != "view" && (
+            <Box width="100%" marginTop={5}>
               <Button
-                fullWidth
+                // fullWidth
                 variant="contained"
                 sx={{ bgcolor: "#904cee" }}
-                onClick={handleBackPage}
+                onClick={handleAdd}
               >
-                Cancel
+                Add Cash-in
               </Button>
             </Box>
-            <Box width="50%">
-              <Button
-                disabled={
-                  valueTitle && valueAmount && selectedDate ? false : true
-                }
-                fullWidth
-                variant="contained"
-                sx={{ bgcolor: "#904cee" }}
-                onClick={handleSubmitData}
-              >
-                {id ? 'Update' : 'Save'}
-              </Button>
-            </Box>
-          </>
-        ) : (
-          <Button
-            fullWidth
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-            onClick={handleBackPage}
-          >
-            Back
-          </Button>
-        )}
-      </Box>
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Delete Confirmation</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setOpenDialog(false)}
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleDeleteConfirm(cashin)}
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+          )}
 
-      <Dialog
-        open={openDialogAdd}
-        onClose={() => setOpenDialogAdd(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Cash-in</DialogTitle>
-        <DialogContent>
-          <Box width="100%" display="flex" gap={3} flexDirection="column">
-            <Box width="100%">
-              {" "}
-              {/* Full width di mobile */}
-              <TextField
-                fullWidth
-                id="standard-basic"
-                label="Description"
-                variant="standard"
-                value={valueDesc}
-                onChange={handlDescChange}
-              />
-            </Box>
-            <Box width="100%">
-              <NumberTextField
-                label="Income Amount"
-                value={valueIncomeAmount}
-                onChange={setValueIncomeAmount}
-              />
+          <Box
+            width="100%"
+            //   border={1}
+            marginTop={3}
+            paddingBottom={2}
+            //   borderColor="#904cee"
+            boxShadow={1}
+          >
+            <Box marginRight={2} marginLeft={2} marginBottom={1} marginTop={1}>
+              <Box width="100%" display="flex">
+                <Box
+                  width="50%"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="flex-start"
+                >
+                  <Box>
+                    <Typography
+                      variant="body1"
+                      paddingTop={2}
+                      fontWeight="bold"
+                    >
+                      Cash-in List
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box width="50%" display="flex" justifyContent="flex-end">
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      paddingTop={2}
+                      fontWeight="bold"
+                    >
+                      Total: {formatCurrencyIDR(valueAmount)}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+
+              {allCashin?.length === 0 ? (
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  height={100}
+                >
+                  <Typography variant="body2" color="textSecondary">
+                    No Data
+                  </Typography>
+                </Box>
+              ) : (
+                <List>
+                  {allCashin?.map((x, index) => (
+                    <ListItem
+                      key={x?._id || `cashin-${index}`}
+                      alignItems="flex-start"
+                      sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
+                      secondaryAction={
+                        mode != "view" && (
+                          <>
+                            <IconButton
+                              edge="end"
+                              onClick={(e) => handleMenuOpen(e, x._id!)}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+
+                            <Menu
+                              anchorEl={menuAnchor.anchorEl}
+                              open={
+                                menuAnchor.anchorEl !== null &&
+                                menuAnchor.id === x._id
+                              }
+                              onClose={handleMenuClose}
+                            >
+                              <MenuItem onClick={() => handleEdit(x)}>
+                                <Typography component="span" variant="body2">
+                                  Edit
+                                </Typography>
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => handleDeleteClick(x)}
+                                sx={{ color: "error.main" }}
+                              >
+                                <Typography component="span" variant="body2">
+                                  Delete
+                                </Typography>
+                              </MenuItem>
+                            </Menu>
+                          </>
+                        )
+                      }
+                    >
+                      <ListItemText
+                        primary={
+                          <Typography component="div">
+                            <Box display="flex" justifyContent="space-between">
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                fontWeight="bold"
+                              >
+                                {x?.description}
+                              </Typography>
+                            </Box>
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography component="div">
+                            <Box display="flex" justifyContent="space-between">
+                              <Typography
+                                component="span"
+                                color="success"
+                                variant="body2"
+                              >
+                                {formatCurrencyIDR(x?.amount)}
+                              </Typography>
+                            </Box>
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
             </Box>
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setOpenDialogAdd(false)}
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleSubmitCashOut(cashin)}
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-            disabled={valueDesc && valueIncomeAmount != "0,00" ? false : true}
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+        </Box>
+        <Box
+          position="fixed"
+          bottom={0}
+          left={0}
+          width="100%"
+          bgcolor="white"
+          boxShadow={3}
+          p={2}
+          display="flex"
+          gap={2}
+        >
+          {mode != "view" ? (
+            <>
+              <Box width="50%">
+                <Button
+                  fullWidth
+                  variant="contained"
+                  sx={{ bgcolor: "#904cee" }}
+                  onClick={handleBackPage}
+                >
+                  Cancel
+                </Button>
+              </Box>
+              <Box width="50%">
+                <Button
+                  disabled={
+                    valueTitle && valueAmount && selectedDate ? false : true
+                  }
+                  fullWidth
+                  variant="contained"
+                  sx={{ bgcolor: "#904cee" }}
+                  onClick={handleSubmitData}
+                >
+                  {id ? "Update" : "Save"}
+                </Button>
+              </Box>
+            </>
+          ) : (
+            <Button
+              fullWidth
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+              onClick={handleBackPage}
+            >
+              Back
+            </Button>
+          )}
+        </Box>
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+          <DialogTitle>Delete Confirmation</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setOpenDialog(false)}
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleDeleteConfirm(cashin)}
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          open={openDialogAdd}
+          onClose={() => setOpenDialogAdd(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Cash-in</DialogTitle>
+          <DialogContent>
+            <Box width="100%" display="flex" gap={3} flexDirection="column">
+              <Box width="100%">
+                {" "}
+                {/* Full width di mobile */}
+                <TextField
+                  fullWidth
+                  id="standard-basic"
+                  color="secondary"
+                  label="Description"
+                  variant="standard"
+                  value={valueDesc}
+                  onChange={handlDescChange}
+                />
+              </Box>
+              <Box width="100%">
+                <NumberTextField
+                  label="Income Amount"
+                  color="secondary"
+                  value={valueIncomeAmount}
+                  onChange={setValueIncomeAmount}
+                />
+              </Box>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setOpenDialogAdd(false)}
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleSubmitCashOut(cashin)}
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+              disabled={valueDesc && valueIncomeAmount != "0,00" ? false : true}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </>
   );
 };
 

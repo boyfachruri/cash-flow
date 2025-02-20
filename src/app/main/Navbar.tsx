@@ -39,6 +39,10 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useState } from "react";
 import { isAuthenticated } from "@/utils/auth";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import { fetchDashboard } from "@/utils/dashboard";
+import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
+import Loader from "@/components/loader";
 
 const drawerWidth = 240;
 
@@ -92,10 +96,17 @@ const listApp = [
   { id: 2, name: "Income", link: "/main/income", icons: <AddCardIcon /> },
   {
     id: 3,
+    name: "My Wallet",
+    link: "/main/wallet",
+    icons: <AccountBalanceWalletIcon />,
+  },
+  {
+    id: 4,
     name: "Expenses",
     link: "/main/expenses",
     icons: <ShoppingCartCheckoutIcon />,
   },
+
   // {
   //   id: 4,
   //   name: "Financial Overview",
@@ -104,29 +115,54 @@ const listApp = [
   // },
 ];
 
+const limitToOneWord = (text: string) => {
+  return text.split(" ")[0]; // Ambil hanya kata pertama
+};
+
 export default function Navbar({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const [fullName, setfullName] = useState<string | null>(null);
+  const [fullName, setfullName] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // State untuk Menu
   const [openMenu, setOpenMenu] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [balanceData, setBalanceData] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
   useEffect(() => {
-    // Ambil role dari localStorage atau state global
+    const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
-    if (userData) {
-      const user = JSON.parse(userData);
-      setRole(user?.role || "user");
-      setfullName(user?.fullname);
-      setUserId(user?._id);
+    if (!isAuthenticated()) {
+      // Redirect hanya di klien
+      router.push("/login");
+    } else {
+      if (userData && token) {
+        const user = JSON.parse(userData);
+        setRole(user?.role || "user");
+        setfullName(user?.fullname);
+        setUserId(user?._id);
+        const fetchData = async () => {
+          try {
+            const response = await fetchDashboard(token, user?._id);
+            setBalanceData(response?.calculateBalance);
+          } catch (err) {
+            setError("Failed to fetch dashboard data");
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchData();
+        const interval = setInterval(fetchData, 10000);
+        return () => clearInterval(interval);
+      } // Jika sudah login, selesai loading
     }
   }, []);
 
@@ -164,167 +200,130 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <AppBar position="fixed">
-        <Toolbar sx={{ bgcolor: "#904cee" }}>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2 }}
+    <>
+      {isLoading == true && <Loader />}
+      <Box sx={{ display: "flex" }}>
+        <CssBaseline />
+        <AppBar position="fixed">
+          <Toolbar
+            sx={{ bgcolor: "#904cee", display: "flex", alignItems: "center" }}
           >
-            <MenuIcon />
-          </IconButton>
-          <Typography fontWeight="bold" variant="body2">
-            Hi, {fullName}
-          </Typography>
-          {/* Tombol Logout */}
-          <IconButton
-            color="inherit"
-            onClick={handleClickUserMenu}
-            sx={{ ml: "auto" }}
-          >
-            <AccountCircleIcon />
-          </IconButton>
-          {/* Menu untuk Logout dan Profil */}
-          <Menu
-            anchorEl={anchorEl}
-            open={openMenu}
-            onClose={handleCloseMenu}
-            MenuListProps={{
-              "aria-labelledby": "basic-button",
-            }}
-          >
-            <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
-              {" "}
-              <ListItemIcon>
-                <AccountCircleIcon />
-                &nbsp; Account
-              </ListItemIcon>
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <ExitToAppIcon />
-                &nbsp; Logout
-              </ListItemIcon>
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography fontWeight="bold" variant="body2">
+              Hi, {limitToOneWord(fullName)}
+            </Typography>
+            <Box sx={{ flexGrow: 1 }} /> {/* Spacer agar elemen di kanan */}
+            {/* Ikon Balance + Saldo */}
+            {/* Tombol Logout */}
+            <IconButton color="inherit" onClick={handleClickUserMenu}>
+              <AccountCircleIcon />
+            </IconButton>
+            {/* Menu untuk Logout dan Profil */}
+            <Menu
+              anchorEl={anchorEl}
+              open={openMenu}
+              onClose={handleCloseMenu}
+              MenuListProps={{ "aria-labelledby": "basic-button" }}
+            >
+              {/* Saldo */}
+              <MenuItem disableRipple>
+                {/* <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}> */}
+                <AccountBalanceWalletIcon
+                  fontSize="small"
+                  sx={{ mr: 1, color: "#904cee" }}
+                />
+                <Typography variant="body2" color="#904cee" fontWeight="bold">
+                  {formatCurrencyIDR(balanceData)}
+                </Typography>
+                {/* </Box> */}
+              </MenuItem>
+              <Divider /> {/* Pemisah */}
+              {/* Akun */}
+              <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
+                <ListItemIcon>
+                  <AccountCircleIcon />
+                  &nbsp; Account
+                </ListItemIcon>
+              </MenuItem>
+              {/* Logout */}
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <ExitToAppIcon />
+                  &nbsp; Logout
+                </ListItemIcon>
+              </MenuItem>
+            </Menu>
+          </Toolbar>
+        </AppBar>
 
-      <Drawer
-        sx={{
-          "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            boxSizing: "border-box",
-            borderRadius: "10px",
-            marginTop: "10px",
-            marginLeft: "3px",
-            height: "calc(100% - 20px)",
-            position: "absolute",
-            top: 0,
-            left: 0,
-          },
-        }}
-        variant="temporary"
-        anchor="left"
-        open={open}
-        onClose={handleDrawerClose}
-        ModalProps={{
-          keepMounted: true,
-        }}
-        PaperProps={{
-          elevation: 3,
-        }}
-        BackdropProps={{
-          invisible: false,
-        }}
-      >
-        <DrawerHeader>
-          <Box width="100%" display="flex">
-            <Box
-              width="50%"
-              display="flex"
-              alignItems="center"
-              justifyContent="flex-start"
-            >
-              <Typography fontWeight="bold" color="secondary">
-                R3g Cashflow
-              </Typography>
-            </Box>
-            <Box width="50%" display="flex" justifyContent="flex-end">
-              <IconButton onClick={handleDrawerClose}>
-                {theme.direction === "ltr" ? (
-                  <ChevronLeftIcon />
-                ) : (
-                  <ChevronRightIcon />
-                )}
-              </IconButton>
-            </Box>
-          </Box>
-        </DrawerHeader>
-        <List>
-          <ListItem key={dashboard.id} disablePadding>
-            <ListItemButton
-              onClick={() => router.push(dashboard.link)}
-              sx={{
-                bgcolor: pathname.startsWith(dashboard.link)
-                  ? "#EEE6FF"
-                  : "transparent",
-                borderLeft: pathname.startsWith(dashboard.link)
-                  ? "4px solid #904cee"
-                  : "none",
-                "&:hover": {
-                  bgcolor: "#EEE6FF",
-                },
-              }}
-            >
-              <ListItemIcon>{dashboard.icons}</ListItemIcon>
-              <ListItemText
-                primary={dashboard.name}
-                sx={{
-                  fontWeight: pathname.startsWith(dashboard.link)
-                    ? "bold"
-                    : "normal",
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
-        <Divider />
-        {role === "admin" && (
-          <List>
-            <ListItem key={userList.id} disablePadding>
-              <ListItemButton
-                onClick={() => router.push(userList.link)}
-                sx={{
-                  bgcolor: pathname.startsWith(userList.link)
-                    ? "#EEE6FF"
-                    : "transparent",
-                  borderLeft: pathname.startsWith(userList.link)
-                    ? "4px solid #904cee"
-                    : "none",
-                }}
+        <Drawer
+          sx={{
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              boxSizing: "border-box",
+              borderRadius: "10px",
+              marginTop: "10px",
+              marginLeft: "3px",
+              height: "calc(100% - 20px)",
+              position: "absolute",
+              top: 0,
+              left: 0,
+            },
+          }}
+          variant="temporary"
+          anchor="left"
+          open={open}
+          onClose={handleDrawerClose}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          PaperProps={{
+            elevation: 3,
+          }}
+          BackdropProps={{
+            invisible: false,
+          }}
+        >
+          <DrawerHeader>
+            <Box width="100%" display="flex">
+              <Box
+                width="50%"
+                display="flex"
+                alignItems="center"
+                justifyContent="flex-start"
               >
-                <ListItemIcon>{userList.icons}</ListItemIcon>
-                <ListItemText primary={userList.name} />
-              </ListItemButton>
-            </ListItem>
-          </List>
-        )}
-        <Divider />
-        <List>
-          {listApp.map((x) => (
-            <ListItem key={x.id} disablePadding>
+                <Typography fontWeight="bold" color="secondary">
+                  R3g Cashflow
+                </Typography>
+              </Box>
+              <Box width="50%" display="flex" justifyContent="flex-end">
+                <IconButton onClick={handleDrawerClose}>
+                  {theme.direction === "ltr" ? (
+                    <ChevronLeftIcon />
+                  ) : (
+                    <ChevronRightIcon />
+                  )}
+                </IconButton>
+              </Box>
+            </Box>
+          </DrawerHeader>
+          <List>
+            <ListItem key={dashboard.id} disablePadding>
               <ListItemButton
-                onClick={() => router.push(x.link)}
+                onClick={() => router.push(dashboard.link)}
                 sx={{
-                  bgcolor: pathname.startsWith(x.link)
+                  bgcolor: pathname.startsWith(dashboard.link)
                     ? "#EEE6FF"
                     : "transparent",
-                  borderLeft: pathname.startsWith(x.link)
+                  borderLeft: pathname.startsWith(dashboard.link)
                     ? "4px solid #904cee"
                     : "none",
                   "&:hover": {
@@ -332,30 +331,84 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                   },
                 }}
               >
-                <ListItemIcon>{x.icons}</ListItemIcon>
+                <ListItemIcon>{dashboard.icons}</ListItemIcon>
                 <ListItemText
-                  primary={x.name}
+                  primary={dashboard.name}
                   sx={{
-                    fontWeight: pathname.startsWith(x.link) ? "bold" : "normal",
+                    fontWeight: pathname.startsWith(dashboard.link)
+                      ? "bold"
+                      : "normal",
                   }}
                 />
               </ListItemButton>
             </ListItem>
-          ))}
-        </List>
-        <Divider />
-      </Drawer>
+          </List>
+          <Divider />
+          {role === "admin" && (
+            <List>
+              <ListItem key={userList.id} disablePadding>
+                <ListItemButton
+                  onClick={() => router.push(userList.link)}
+                  sx={{
+                    bgcolor: pathname.startsWith(userList.link)
+                      ? "#EEE6FF"
+                      : "transparent",
+                    borderLeft: pathname.startsWith(userList.link)
+                      ? "4px solid #904cee"
+                      : "none",
+                  }}
+                >
+                  <ListItemIcon>{userList.icons}</ListItemIcon>
+                  <ListItemText primary={userList.name} />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          )}
+          <Divider />
+          <List>
+            {listApp.map((x) => (
+              <ListItem key={x.id} disablePadding>
+                <ListItemButton
+                  onClick={() => router.push(x.link)}
+                  sx={{
+                    bgcolor: pathname.startsWith(x.link)
+                      ? "#EEE6FF"
+                      : "transparent",
+                    borderLeft: pathname.startsWith(x.link)
+                      ? "4px solid #904cee"
+                      : "none",
+                    "&:hover": {
+                      bgcolor: "#EEE6FF",
+                    },
+                  }}
+                >
+                  <ListItemIcon>{x.icons}</ListItemIcon>
+                  <ListItemText
+                    primary={x.name}
+                    sx={{
+                      fontWeight: pathname.startsWith(x.link)
+                        ? "bold"
+                        : "normal",
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+          <Divider />
+        </Drawer>
 
-      <Main>
-        <DrawerHeader />
-        {children}
-      </Main>
+        <Main>
+          <DrawerHeader />
+          {children}
+        </Main>
 
-      <Snackbar open={openSnackbar} autoHideDuration={3000}>
-        <Alert severity="warning" variant="filled">
-          Your session has expired. Please log in again.
-        </Alert>
-      </Snackbar>
-    </Box>
+        <Snackbar open={openSnackbar} autoHideDuration={3000}>
+          <Alert severity="warning" variant="filled">
+            Your session has expired. Please log in again.
+          </Alert>
+        </Snackbar>
+      </Box>
+    </>
   );
 }

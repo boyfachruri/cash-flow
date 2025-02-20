@@ -52,6 +52,7 @@ interface DashboardDataInterface {
 export default function DashboardScreen() {
   const router = useRouter();
   const [balanceData, setBalanceData] = useState(0);
+  const [walletData, setWalletData] = useState(0);
   const [incomeData, setIncomeData] = useState(0);
   const [expensesData, setExpensesData] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -72,6 +73,7 @@ export default function DashboardScreen() {
             setBalanceData(response?.calculateBalance);
             setIncomeData(response?.calculateIncome);
             setExpensesData(response?.calculateExpenses);
+            setWalletData(response?.calculateWallet)
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
@@ -95,8 +97,8 @@ export default function DashboardScreen() {
       </Typography>
       <Grid container spacing={3}>
         {/* Kartu Net Balance */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ backgroundColor: "#904cee" }}>
+        <Grid item xs={12} md={3}>
+          <Card sx={{ backgroundColor: "#504BFD" }}>
             <CardContent>
               <Typography variant="h6" color="white">
                 Net Balance
@@ -108,8 +110,21 @@ export default function DashboardScreen() {
           </Card>
         </Grid>
 
+        <Grid item xs={12} md={3}>
+          <Card sx={{ backgroundColor: "#904cee" }}>
+            <CardContent>
+              <Typography variant="h6" color="white">
+               My Wallet
+              </Typography>
+              <Typography variant="h6" color="white">
+                {formatCurrencyIDR(walletData)}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
         {/* Kartu Total Income */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <Card sx={{ backgroundColor: "#1EC612" }}>
             <CardContent>
               <Typography variant="h6" color="white">
@@ -123,7 +138,7 @@ export default function DashboardScreen() {
         </Grid>
 
         {/* Kartu Total Expenses */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <Card sx={{ backgroundColor: "#DC1717" }}>
             <CardContent>
               <Typography variant="h6" color="white">

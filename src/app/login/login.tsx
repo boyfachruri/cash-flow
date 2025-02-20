@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { loginUser, registerUser } from "@/utils/auth";
+import Loader from "@/components/loader";
 
 interface FormData {
   username: string;
@@ -40,6 +41,7 @@ export default function LoginForm() {
   });
 
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
 
@@ -49,7 +51,7 @@ export default function LoginForm() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setLoading(true);
     // Untuk Register, periksa apakah password dan confirm password cocok
     if (tab === 1 && formData.password !== formData.confirmPassword) {
       setError("Password and Confirm Password do not match");
@@ -92,9 +94,30 @@ export default function LoginForm() {
       } else {
         setError("Registration failed");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+    
+  //   try {
+  //     const response = await fetch("/api/submit", {
+  //       method: "POST",
+  //       body: JSON.stringify({ name: "John Doe" }),
+  //       headers: { "Content-Type": "application/json" },
+  //     });
+
+  //     const result = await response.json();
+  //     console.log(result);
+  //   } catch (error) {
+  //     console.error("Error submitting form", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleCloseDialog = () => {
     setTab(0);
     setOpenDialog(false);
@@ -102,7 +125,13 @@ export default function LoginForm() {
   };
 
   return (
-    <Container>
+    <>
+    {
+      loading == true && (
+        <Loader />
+      )
+    }
+          <Container>
       <Container
         maxWidth="sm"
         sx={{
@@ -265,5 +294,7 @@ export default function LoginForm() {
         </Dialog>
       </Container>
     </Container>
+    </>
+
   );
 }

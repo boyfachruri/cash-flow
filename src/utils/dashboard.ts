@@ -1,16 +1,7 @@
 import axios from 'axios';
 
-export interface UserInterface {
-    _id: string,
-    username: string, 
-    fullname: string,
-    email: string,
-    role: string,
-    status: string,
-    date: Date
-}
 
-const API_BASE_URL = process.env.NEXT_LOCAL_API_URL || process.env.NEXT_PUBLIC_API_URL;;
+const API_BASE_URL = process.env.NEXT_LOCAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
 
 export const fetchDashboard = async (token: string, userId: string) => {
     try {
