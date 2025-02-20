@@ -137,6 +137,9 @@ const WalletList = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
   const handleAdd = async () => {
+    setWalletById(undefined);
+    setValueAmount("0,00");
+    setSelectedDate(dayjs);
     setOpenDialogAdd(true);
   };
 
@@ -212,17 +215,11 @@ const WalletList = () => {
     setOpenDialog(false);
   };
 
-  useEffect(() => {
-    if (openDialogAdd == false) {
-      setWalletById(undefined);
-    }
-  }, [openDialogAdd]);
-
   const handleSubmit = () => {
     setIsLoading(true);
     console.log(walletListById);
 
-    if (!walletListById) {
+    if (!walletById) {
       const newData = {
         amount: parseFormattedNumber(valueAmount),
         date: selectedDate ? selectedDate.toDate() : new Date(),
@@ -234,10 +231,10 @@ const WalletList = () => {
 
           const responseData = await fetchWalletList(tokens, userId || "");
           setWalletList(responseData);
+          setOpenDialogAdd(false);
         } catch (err) {
           console.error(err);
         } finally {
-          setOpenDialogAdd(false);
           setIsLoading(false);
         }
       };
@@ -257,10 +254,10 @@ const WalletList = () => {
           );
           const responseData = await fetchWalletList(tokens, userId || "");
           setWalletList(responseData);
+          setOpenDialogAdd(false);
         } catch (err) {
           console.error(err);
         } finally {
-          setOpenDialogAdd(false);
           setIsLoading(false);
         }
       };
@@ -424,14 +421,14 @@ const WalletList = () => {
                   />
                 </LocalizationProvider>
               </Box>
-              <Box width="100%">
+              {/* <Box width="100%">
                 <NumberTextField
                   label="Balance Amount"
                   color="secondary"
                   value={balance}
                   disabled
                 />
-              </Box>
+              </Box> */}
               <Box width="100%">
                 <NumberTextField
                   label="Wallet Amount"
@@ -455,7 +452,8 @@ const WalletList = () => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
               disabled={
-                disabledSave == false && selectedDate && valueAmount != "0,00"
+                // disabledSave == false &&
+                 selectedDate && valueAmount != "0,00"
                   ? false
                   : true
               }
