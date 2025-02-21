@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -8,12 +9,16 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControl,
   IconButton,
+  InputLabel,
   List,
   ListItem,
   ListItemText,
   Menu,
   MenuItem,
+  Select,
+  SelectChangeEvent,
   TextField,
   Typography,
 } from "@mui/material";
@@ -34,6 +39,7 @@ import {
   updateExpenses,
 } from "@/utils/expenses";
 import Loader from "@/components/loader";
+import { capitalizeFirstLetter } from "@/components/functions/CapitalFirstLetter";
 
 interface ExpensesFormInterface {
   id?: string;
@@ -46,6 +52,8 @@ interface CashOutInterface {
   desc: string;
   amount: number;
 }
+
+export const amountTypeList = ["balance", "wallet"];
 
 const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   const router = useRouter();
@@ -67,6 +75,10 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   const [userId, setUserId] = useState("");
   const [tokens, setTokens] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [amountType, setAmountType] = useState("");
+
+  console.log(amountType, 'amountType');
+  
 
   function parseFormattedNumber(str: string) {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
@@ -143,11 +155,15 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
       }
       setValueDesc("");
       setValueExpensesAmount("0,00");
+      setAmountType("")
     } else {
       if (cashin) {
+        console.log(cashin);
+        
         setValueDesc(cashin?.description);
         const formatAmount = formatNumberToIDR(cashin?.amount);
         setValueExpensesAmount(formatAmount);
+        setAmountType(cashin?.amountType)
       }
     }
   }, [openDialogAdd, cashin, openDialog]);
@@ -208,6 +224,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
         id: crypto.randomUUID(),
         description: valueDesc,
         amount: parseFormattedNumber(valueExpensesAmount),
+        amountType: amountType,
         date: selectedDate ? selectedDate.toDate() : new Date(),
       };
       setAllCashin([...allCashin, newCashin]);
@@ -220,6 +237,8 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                 ...item,
                 description: valueDesc,
                 amount: parseFormattedNumber(valueExpensesAmount),
+                amountType: amountType,
+                date: selectedDate ? selectedDate.toDate() : new Date(),
               }
             : item
         )
@@ -270,6 +289,10 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
       };
       submitData();
     }
+  };
+
+  const handleAmountTypeChange = (event: SelectChangeEvent) => {
+    setAmountType(event.target.value as string);
   };
 
   return (
@@ -436,6 +459,14 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                               >
                                 {x?.description}
                               </Typography>
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                fontWeight="bold"
+                                color={x?.amountType == 'balance' ? "#504BFD" : "#904cee"}
+                              >
+                                {capitalizeFirstLetter(x?.amountType)}
+                              </Typography>
                             </Box>
                           </Typography>
                         }
@@ -556,6 +587,23 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                 />
               </Box>
               <Box width="100%">
+                <Autocomplete
+                  fullWidth
+                  disablePortal
+                  options={amountTypeList}
+                  // sx={{ width: 300 }}
+                  value={capitalizeFirstLetter(amountType)}
+                  onChange={(event, newValue) => setAmountType(newValue || '')}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Payment Type"
+                      variant="standard"
+                    />
+                  )}
+                />
+              </Box>
+              <Box width="100%">
                 <NumberTextField
                   label="Expenses Amount"
                   color="secondary"
@@ -578,7 +626,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
               disabled={
-                valueDesc && valueExpensesAmount != "0,00" ? false : true
+                amountType && valueDesc && valueExpensesAmount != "0,00" ? false : true
               }
             >
               Save

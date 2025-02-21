@@ -4,6 +4,7 @@ export interface ExpensesDetailsFormInterface {
   _id?: string;
   expensesId?: string;
   description: string;
+  amountType: string;
   amount: number;
   date: Date;
 }

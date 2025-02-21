@@ -70,6 +70,8 @@ const WalletList = () => {
   const [valueAmount, setValueAmount] = useState<string>("0,00");
   const [balance, setBalance] = useState<string>("0,00");
   const [disabledSave, setDisabledSave] = useState(false);
+  const [mode, setMode] = useState('');
+  
 
   function parseFormattedNumber(str: string) {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
@@ -140,6 +142,7 @@ const WalletList = () => {
     setWalletById(undefined);
     setValueAmount("0,00");
     setSelectedDate(dayjs);
+    setMode('add');
     setOpenDialogAdd(true);
   };
 
@@ -164,7 +167,7 @@ const WalletList = () => {
 
     const formatAmount = formatNumberToIDR(data?.amount);
     setValueAmount(formatAmount);
-
+    setMode('edit')
     setWalletById(data);
     setOpenDialogAdd(true);
     handleMenuClose();
@@ -324,9 +327,6 @@ const WalletList = () => {
                       onClose={handleMenuClose}
                     >
                       <MenuItem onClick={() => handleView(x)}>
-                        <Typography component="span" variant="body2">
-                          View
-                        </Typography>
                       </MenuItem>
                       <MenuItem onClick={() => handleEdit(x)}>
                         <Typography component="span" variant="body2">
@@ -399,7 +399,7 @@ const WalletList = () => {
           maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>Add Wallet</DialogTitle>
+          <DialogTitle>{mode == 'edit' ? 'Edit' : 'Add'} Wallet</DialogTitle>
           <DialogContent>
             <Box width="100%" display="flex" gap={3} flexDirection="column">
               <Box width="100%">
