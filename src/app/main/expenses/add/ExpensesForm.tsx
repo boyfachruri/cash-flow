@@ -597,6 +597,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
+                      color="secondary"
                       label="Payment Type"
                       variant="standard"
                     />
