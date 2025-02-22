@@ -326,8 +326,6 @@ const WalletList = () => {
                       }
                       onClose={handleMenuClose}
                     >
-                      <MenuItem onClick={() => handleView(x)}>
-                      </MenuItem>
                       <MenuItem onClick={() => handleEdit(x)}>
                         <Typography component="span" variant="body2">
                           Edit
