@@ -106,14 +106,14 @@ const listApp = [
     link: "/main/expenses",
     icons: <ShoppingCartCheckoutIcon />,
   },
-
-  // {
-  //   id: 4,
-  //   name: "Financial Overview",
-  //   link: "/main/financial-overview",
-  //   icons: <CalculateIcon />,
-  // },
 ];
+
+const transactionList = {
+  id: 6,
+  name: "Financial Overview",
+  link: "/main/financial-overview",
+  icons: <CalculateIcon />,
+};
 
 const limitToOneWord = (text: string) => {
   return text.split(" ")[0]; // Ambil hanya kata pertama
@@ -133,6 +133,24 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [walletData, setWalletData] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const [language, setLanguage] = useState("ID"); // Default ke Indonesia
+
+  const handleLanguageChange = (lang: string) => {
+    setLanguage(lang);
+    localStorage.setItem("language", lang); // Simpan ke localStorage agar tetap tersimpan
+  };
+
+  // State untuk menu bahasa
+  const [anchorLang, setAnchorLang] = useState<null | HTMLElement>(null);
+
+  const handleClickLangMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorLang(event.currentTarget);
+  };
+
+  const handleCloseLangMenu = () => {
+    setAnchorLang(null);
+  };
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -221,8 +239,27 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               Hi, {limitToOneWord(fullName)}
             </Typography>
             <Box sx={{ flexGrow: 1 }} /> {/* Spacer agar elemen di kanan */}
-            {/* Ikon Balance + Saldo */}
-            {/* Tombol Logout */}
+            <IconButton color="inherit" onClick={handleClickLangMenu}>
+              <Typography fontWeight="bold">{language}</Typography>
+            </IconButton>
+            <Menu
+              anchorEl={anchorLang}
+              open={Boolean(anchorLang)}
+              onClose={handleCloseLangMenu}
+            >
+              <MenuItem
+                onClick={() => handleLanguageChange("ID")}
+                style={{ fontFamily: "Segoe UI Emoji, Roboto, sans-serif" }}
+              >
+                Indonesia
+              </MenuItem>
+              <MenuItem
+                onClick={() => handleLanguageChange("EN")}
+                style={{ fontFamily: "Segoe UI Emoji, Roboto, sans-serif" }}
+              >
+                English
+              </MenuItem>
+            </Menu>
             <IconButton color="inherit" onClick={handleClickUserMenu}>
               <AccountCircleIcon />
             </IconButton>
@@ -315,6 +352,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               </Box>
             </Box>
           </DrawerHeader>
+          <Divider />
           <List>
             <ListItem key={dashboard.id} disablePadding>
               <ListItemButton
@@ -356,6 +394,9 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                     borderLeft: pathname.startsWith(userList.link)
                       ? "4px solid #904cee"
                       : "none",
+                    "&:hover": {
+                      bgcolor: "#EEE6FF",
+                    },
                   }}
                 >
                   <ListItemIcon>{userList.icons}</ListItemIcon>
@@ -396,6 +437,28 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
             ))}
           </List>
           <Divider />
+          <List>
+              <ListItem key={transactionList.id} disablePadding>
+                <ListItemButton
+                  onClick={() => router.push(transactionList.link)}
+                  sx={{
+                    bgcolor: pathname.startsWith(transactionList.link)
+                      ? "#EEE6FF"
+                      : "transparent",
+                    borderLeft: pathname.startsWith(transactionList.link)
+                      ? "4px solid #904cee"
+                      : "none",
+                    "&:hover": {
+                      bgcolor: "#EEE6FF",
+                    },
+                  }}
+                >
+                  <ListItemIcon>{transactionList.icons}</ListItemIcon>
+                  <ListItemText primary={transactionList.name} />
+                </ListItemButton>
+              </ListItem>
+            </List>
+            <Divider />
         </Drawer>
 
         <Main>

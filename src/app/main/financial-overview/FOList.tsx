@@ -23,11 +23,24 @@ import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useRouter } from "next/navigation";
 import { DateFormatter } from "@/components/functions/DateFormatter";
-import { FOData } from "./data";
-import { FOListingProps } from "./interface";
+// import { FoListInterface } from "./interfaceProps";
 import { isAuthenticated } from "@/utils/auth";
+import Loader from "@/components/loader";
+import { createFo, fetchFo } from "@/utils/fo";
+import dayjs, { Dayjs } from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-const FOList = () => {
+interface FoListInterface {
+  _id?: string;
+  userId: string;
+  fromDate: Date;
+  toDate: Date;
+  date: Date;
+}
+
+const FoList = () => {
   const router = useRouter();
   const [menuAnchor, setMenuAnchor] = useState<{
     anchorEl: HTMLElement | null;
@@ -38,15 +51,46 @@ const FOList = () => {
   });
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [tokens, setTokens] = useState("");
+  const [foList, setFoList] = useState<FoListInterface[]>([]);
+  const [foListById, setFoListById] = useState<FoListInterface>();
+  const [openDialogAdd, setOpenDialogAdd] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
+  const [selectedDateStart, setSelectedDateStart] = useState<Dayjs | null>(
+    null
+  );
+  const [selectedDateEnd, setSelectedDateEnd] = useState<Dayjs | null>(null);
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const userData = localStorage.getItem("user");
+
     if (!isAuthenticated()) {
       // Redirect hanya di klien
       router.push("/login");
     } else {
-      setIsLoading(false); // Jika sudah login, selesai loading
+      if (userData && token) {
+        setTokens(token);
+        const user = JSON.parse(userData);
+        if (user) {
+          setUserId(user?._id);
+          const fetchData = async () => {
+            try {
+              const response = await fetchFo(token, user?._id);
+
+              setFoList(response);
+            } catch (err) {
+              setError("Failed to fetch dashboard data");
+            } finally {
+              setIsLoading(false);
+            }
+          };
+          fetchData();
+        }
+      } // Jika sudah login, selesai loading
     }
   }, []);
 
@@ -55,11 +99,11 @@ const FOList = () => {
   };
 
   // Filter data berdasarkan pencarian
-  const filteredData = FOData.filter(
-    (item) => item.title.toLowerCase().includes(searchQuery)
-    // ||
-    //   DateFormatter(item.date).includes(searchQuery) ||
-    //   item.amount.toString().includes(searchQuery)
+  const filteredData = foList.filter(
+    (item) =>
+      DateFormatter(String(item.date)).includes(searchQuery) ||
+      DateFormatter(String(item.date)).includes(searchQuery) ||
+      DateFormatter(String(item.date)).includes(searchQuery)
   );
 
   // Handle open/close menu
@@ -70,173 +114,272 @@ const FOList = () => {
   const handleMenuClose = () => {
     setMenuAnchor({ anchorEl: null, id: null });
   };
-  const handleAdd = () => {
-    router.push(`/main/financial-overview/add`);
+  const handleAdd = async () => {
+    setOpenDialogAdd(true);
   };
 
   // Aksi untuk pindah screen
-  const handleView = (data: FOListingProps) => {
-    router.push(`/main/financial-overview/view/${data.id}`);
+  const handleView = async (data: FoListInterface) => {
+    setIsLoading(true);
+
+    try {
+      await router.push(`/main/financial-overview/view/${data._id}`);
+    } finally {
+      setIsLoading(false);
+    }
+
     handleMenuClose();
   };
 
-  const handleEdit = (data: FOListingProps) => {
-    router.push(`/main/financial-overview/edit/${data.id}`);
-    handleMenuClose();
+  const handleSubmit = () => {
+    setIsLoading(true);
+    const newData = {
+      date: selectedDate ? selectedDate.toDate() : new Date(),
+      fromDate: selectedDateStart ? selectedDateStart.toDate() : new Date(),
+      toDate: selectedDateEnd ? selectedDateEnd.toDate() : new Date(),
+      userId: userId,
+    };
+    const submitData = async () => {
+      try {
+        const response = await createFo(newData);
+
+        const responseData = await fetchFo(tokens, userId || "");
+        setFoList(responseData);
+        setOpenDialogAdd(false);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    submitData();
   };
 
-  // Handle delete dialog
-  const handleDeleteClick = () => {
-    setOpenDialog(true);
-    handleMenuClose();
+  const handleStartDateChange = (newValue: Dayjs | null) => {
+    if (newValue && selectedDateEnd && newValue.isAfter(selectedDateEnd)) {
+      setSelectedDateEnd(newValue); // Atur end date agar minimal sama dengan start date
+    }
+    setSelectedDateStart(newValue);
   };
 
-  const handleDeleteConfirm = (data: FOListingProps) => {
-    setOpenDialog(false);
+  const handleEndDateChange = (newValue: Dayjs | null) => {
+    if (newValue && selectedDateStart && newValue.isBefore(selectedDateStart)) {
+      setSelectedDateStart(newValue); // Atur start date agar maksimal sama dengan end date
+    }
+    setSelectedDateEnd(newValue);
   };
 
   return (
-    <div>
-      {/* <div> */}
-      <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        Financial Overview
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 9, md: 11 }}>
-          <Search onSearch={handleSearch} />
+    <>
+      {isLoading == true && <Loader />}
+      <div>
+        {/* <div> */}
+        <Typography variant="h6" paddingBottom={3} fontWeight="bold">
+          Financial Overview
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 9, md: 11 }}>
+            <Search onSearch={handleSearch} />
+          </Grid>
+          <Grid size={{ xs: 3, md: 1 }} textAlign="right">
+            <Button
+              fullWidth
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+              onClick={handleAdd}
+            >
+              Add
+            </Button>
+          </Grid>
         </Grid>
-        <Grid size={{ xs: 3, md: 1 }} textAlign="right">
-          <Button
-            fullWidth
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-            onClick={handleAdd}
-          >
-            Add
-          </Button>
-        </Grid>
-      </Grid>
-      {/* </div> */}
+        {/* </div> */}
 
-      <List>
-        {filteredData?.map((x) => (
-          <ListItem
-            key={x?.id}
-            alignItems="flex-start"
-            sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
-            secondaryAction={
-              <>
-                <IconButton
-                  edge="end"
-                  onClick={(e) => handleMenuOpen(e, x.id!)}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-                <Menu
-                  anchorEl={menuAnchor.anchorEl}
-                  open={menuAnchor.anchorEl !== null && menuAnchor.id === x.id}
-                  onClose={handleMenuClose}
-                >
-                  <MenuItem onClick={() => handleView(x)}>
-                    <Typography component="span" variant="body2">
-                      View
-                    </Typography>
-                  </MenuItem>
-                  <MenuItem onClick={() => handleEdit(x)}>
-                    <Typography component="span" variant="body2">
-                      Edit
-                    </Typography>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={handleDeleteClick}
-                    sx={{ color: "error.main" }}
-                  >
-                    <Typography component="span" variant="body2">
-                      Delete
-                    </Typography>
-                  </MenuItem>
-                </Menu>
-              </>
-            }
+        {filteredData?.length === 0 ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height={100}
           >
-            <ListItemText
-              primary={
-                <Typography component="div">
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      fontWeight="bold"
+            <Typography variant="body2" color="textSecondary">
+              No Data
+            </Typography>
+          </Box>
+        ) : (
+          <List>
+            {filteredData?.map((x) => (
+              <ListItem
+                key={x?._id}
+                alignItems="flex-start"
+                sx={{ borderRadius: "5px", marginTop: 1, boxShadow: 1 }}
+                secondaryAction={
+                  <>
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => handleMenuOpen(e, x._id!)}
                     >
-                      {x?.title}
-                    </Typography>
-                    <Typography component="span" variant="body2">
-                      {DateFormatter(x?.fromDate)} - {DateFormatter(x?.toDate)}
-                    </Typography>
-                  </Box>
-                </Typography>
-              }
-              secondary={
-                <Typography component="div">
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography>
-                      <Typography
-                        component="span"
-                        color="success"
-                        variant="body2"
+                      <MoreVertIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={menuAnchor.anchorEl}
+                      open={
+                        menuAnchor.anchorEl !== null && menuAnchor.id === x._id
+                      }
+                      onClose={handleMenuClose}
+                    >
+                      <MenuItem onClick={() => handleView(x)}>
+                        <Typography component="span" variant="body2">
+                          View
+                        </Typography>
+                      </MenuItem>
+                      {/* <MenuItem onClick={() => handleEdit(x)}>
+                        <Typography component="span" variant="body2">
+                          Edit
+                        </Typography>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleDeleteClick(x)}
+                        sx={{ color: "error.main" }}
                       >
-                        {formatCurrencyIDR(x?.income)}
-                      </Typography>{" "}
-                      /{" "}
-                      <Typography
-                        component="span"
-                        color="error"
-                        variant="body2"
-                      >
-                        {formatCurrencyIDR(x?.expenses)}
-                      </Typography>
+                        <Typography component="span" variant="body2">
+                          Delete
+                        </Typography>
+                      </MenuItem> */}
+                    </Menu>
+                  </>
+                }
+              >
+                <ListItemText
+                  primary={
+                    <Typography component="div">
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          fontWeight="bold"
+                        >
+                          Start Date: {DateFormatter(String(x?.fromDate))}
+                        </Typography>
+                        <Typography component="span" variant="body2">
+                          {DateFormatter(String(x?.date))}
+                        </Typography>
+                      </Box>
                     </Typography>
+                  }
+                  secondary={
+                    <Typography component="div">
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          fontWeight="bold"
+                        >
+                          End Date: {DateFormatter(String(x?.toDate))}
+                        </Typography>
+                        {/* <Typography component="span" variant="body2" >
+                  {x?.tanggal}
+                </Typography> */}
+                      </Box>
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
 
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      color="secondary"
-                    >
-                      {formatCurrencyIDR(x?.balance)}
-                    </Typography>
-                  </Box>
-                </Typography>
+        <Dialog
+          open={openDialogAdd}
+          onClose={() => setOpenDialogAdd(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Calculate Financial Overview</DialogTitle>
+          <DialogContent>
+            <Box width="100%" display="flex" gap={3} flexDirection="column">
+              <Box width="100%">
+                {" "}
+                {/* Full width di mobile */}
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <MobileDatePicker
+                    format="DD/MM/YYYY"
+                    disabled
+                    slotProps={{
+                      textField: {
+                        color: "secondary",
+                        fullWidth: true, // ✅ Agar input full width
+                        variant: "standard", // ✅ Menggunakan variant "standard"
+                      },
+                    }}
+                    label="Release Date"
+                    value={selectedDate}
+                    onChange={(newValue) => setSelectedDate(newValue)}
+                  />
+                </LocalizationProvider>
+              </Box>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <Box width="100%">
+                  <MobileDatePicker
+                    format="DD/MM/YYYY"
+                    label="Start Date"
+                    maxDate={selectedDate || undefined}
+                    value={selectedDateStart}
+                    onChange={handleStartDateChange}
+                    slotProps={{
+                      textField: {
+                        color: "secondary",
+                        fullWidth: true,
+                        variant: "standard",
+                      },
+                    }}
+                  />
+                </Box>
+                <Box width="100%" mt={2}>
+                  <MobileDatePicker
+                    format="DD/MM/YYYY"
+                    label="End Date"
+                    value={selectedDateEnd}
+                    onChange={handleEndDateChange}
+                    maxDate={selectedDate || undefined}
+                    minDate={selectedDateStart || undefined} // ⬅️ Menentukan batas minimum
+                    slotProps={{
+                      textField: {
+                        color: "secondary",
+                        fullWidth: true,
+                        variant: "standard",
+                      },
+                    }}
+                  />
+                </Box>
+              </LocalizationProvider>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setOpenDialogAdd(false)}
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleSubmit()}
+              variant="contained"
+              sx={{ bgcolor: "#904cee" }}
+              disabled={
+                // disabledSave == false &&
+                selectedDate && selectedDateEnd && selectedDateStart
+                  ? false
+                  : true
               }
-            />
-          </ListItem>
-        ))}
-      </List>
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Delete Confirmation</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setOpenDialog(false)}
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleDeleteConfirm}
-            variant="contained"
-            sx={{ bgcolor: "#904cee" }}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </>
   );
 };
 
-export default FOList;
+export default FoList;
