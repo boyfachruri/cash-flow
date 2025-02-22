@@ -239,7 +239,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               Hi, {limitToOneWord(fullName)}
             </Typography>
             <Box sx={{ flexGrow: 1 }} /> {/* Spacer agar elemen di kanan */}
-            <IconButton color="inherit" onClick={handleClickLangMenu}>
+            {/* <IconButton color="inherit" onClick={handleClickLangMenu}>
               <Typography fontWeight="bold">{language}</Typography>
             </IconButton>
             <Menu
@@ -259,7 +259,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               >
                 English
               </MenuItem>
-            </Menu>
+            </Menu> */}
             <IconButton color="inherit" onClick={handleClickUserMenu}>
               <AccountCircleIcon />
             </IconButton>
