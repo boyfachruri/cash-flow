@@ -101,8 +101,8 @@ const FoList = () => {
   // Filter data berdasarkan pencarian
   const filteredData = foList.filter(
     (item) =>
-      DateFormatter(String(item.date)).includes(searchQuery) ||
-      DateFormatter(String(item.date)).includes(searchQuery) ||
+      DateFormatter(String(item.fromDate)).includes(searchQuery) ||
+      DateFormatter(String(item.toDate)).includes(searchQuery) ||
       DateFormatter(String(item.date)).includes(searchQuery)
   );
 
