@@ -146,6 +146,8 @@ const FoList = () => {
         const responseData = await fetchFo(tokens, userId || "");
         setFoList(responseData);
         setOpenDialogAdd(false);
+        setSelectedDateStart(null)
+        setSelectedDateEnd(null)
       } catch (err) {
         console.error(err);
       } finally {
@@ -296,6 +298,7 @@ const FoList = () => {
         >
           <DialogTitle>Calculate Financial Overview</DialogTitle>
           <DialogContent>
+          {isLoading == true && <Loader />}
             <Box width="100%" display="flex" gap={3} flexDirection="column">
               <Box width="100%">
                 {" "}

@@ -401,6 +401,7 @@ const WalletList = () => {
         >
           <DialogTitle>{mode == 'edit' ? 'Edit' : 'Add'} Wallet</DialogTitle>
           <DialogContent>
+          {isLoading == true && <Loader />}
             <Box width="100%" display="flex" gap={3} flexDirection="column">
               <Box width="100%">
                 {" "}
