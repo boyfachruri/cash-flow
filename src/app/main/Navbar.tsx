@@ -293,14 +293,14 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
                 <ListItemIcon>
                   <AccountCircleIcon />
-                  &nbsp; Account
+                  &nbsp; {language === 'ID' ? "Akun" : "Account"}
                 </ListItemIcon>
               </MenuItem>
               {/* Logout */}
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>
                   <ExitToAppIcon />
-                  &nbsp; Logout
+                  &nbsp; {language === 'ID' ? "Keluar" : "Logout"}
                 </ListItemIcon>
               </MenuItem>
             </Menu>
@@ -474,7 +474,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
 
         <Snackbar open={openSnackbar} autoHideDuration={3000}>
           <Alert severity="warning" variant="filled">
-            Your session has expired. Please log in again.
+            {language === 'ID' ? "Sesi kamu sudah berakhir, silahkan masuk kembali" : "Your session has expired. Please log in again."}
           </Alert>
         </Snackbar>
       </Box>
