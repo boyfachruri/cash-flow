@@ -536,7 +536,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
           maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>Cash-in</DialogTitle>
+          <DialogTitle>{language === 'ID' ? 'Uang Masuk' : "Cash-in"}</DialogTitle>
           <DialogContent>
             <Box width="100%" display="flex" gap={3} flexDirection="column">
               <Box width="100%">

@@ -513,7 +513,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                   sx={{ bgcolor: "#904cee" }}
                   onClick={handleBackPage}
                 >
-                  {language === 'ID' ? 'Ubah' : "Cancel"}
+                  {language === 'ID' ? 'Batal' : "Cancel"}
                 </Button>
               </Box>
               <Box width="50%">
@@ -572,7 +572,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
           maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>Cash-out</DialogTitle>
+          <DialogTitle>{language === 'ID' ? 'Uang Keluar' : "Cash-out"}</DialogTitle>
           <DialogContent>
             <Box width="100%" display="flex" gap={3} flexDirection="column">
               <Box width="100%">
