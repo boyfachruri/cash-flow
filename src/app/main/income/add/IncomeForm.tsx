@@ -73,6 +73,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
 
   const [cashin, setCashin] = useState<IncomeDetailsFormInterface>();
   const [allCashin, setAllCashin] = useState<IncomeDetailsFormInterface[]>([]);
+  const [language, setLanguage] = useState("EN");
 
   const formatNumberToIDR = (num: number): string => {
     return new Intl.NumberFormat("id-ID", {
@@ -96,6 +97,8 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
   useEffect(() => {
     const userData = localStorage.getItem("user");
     const token = localStorage.getItem("access_token");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || 'EN');
     if (userData && token) {
       const user = JSON.parse(userData);
       setUserId(user?._id);
@@ -270,7 +273,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
       {isLoading === true && <Loader />}
       <div>
         <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-          Income Form
+          {language === 'ID' ? 'Form Pemasukan' : "Income Form"}
         </Typography>
         <Box
           width="100%"
@@ -286,7 +289,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
               fullWidth
               id="standard-basic"
               color="secondary"
-              label="Title"
+              label={language === 'ID' ? 'Judul' : "Title"}
               variant="standard"
               value={valueTitle}
               onChange={handleTitleChange}
@@ -296,6 +299,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <MobileDatePicker
                 format="DD/MM/YYYY"
+                maxDate={dayjs()}
                 slotProps={{
                   textField: {
                     color: "secondary",
@@ -303,7 +307,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                     variant: "standard", // ✅ Menggunakan variant "standard"
                   },
                 }}
-                label="Date"
+                label={language === 'ID' ? 'Tanggal' : "Date"}
                 value={selectedDate}
                 onChange={(newValue) => setSelectedDate(newValue)}
                 disabled={mode == "view" ? true : false}
@@ -320,7 +324,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                 sx={{ bgcolor: "#904cee" }}
                 onClick={handleAdd}
               >
-                Add Cash-in
+                {language === 'ID' ? 'Tambah Uang Masuk' : "Add Cash-in"}
               </Button>
             </Box>
           )}
@@ -347,7 +351,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                       paddingTop={2}
                       fontWeight="bold"
                     >
-                      Cash-in List
+                      {language === 'ID' ? 'Daftar Uang Masuk' : "Cash-in List"}
                     </Typography>
                   </Box>
                 </Box>
@@ -372,7 +376,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                   height={100}
                 >
                   <Typography variant="body2" color="textSecondary">
-                    No Data
+                    {language === 'ID' ? 'Tidak Ada Data' : "No Data"}
                   </Typography>
                 </Box>
               ) : (
@@ -402,7 +406,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                             >
                               <MenuItem onClick={() => handleEdit(x)}>
                                 <Typography component="span" variant="body2">
-                                  Edit
+                                  {language === 'ID' ? 'Ubah' : "Edit"}
                                 </Typography>
                               </MenuItem>
                               <MenuItem
@@ -410,7 +414,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                                 sx={{ color: "error.main" }}
                               >
                                 <Typography component="span" variant="body2">
-                                  Delete
+                                  {language === 'ID' ? 'Hapus' : "Delete"}
                                 </Typography>
                               </MenuItem>
                             </Menu>
@@ -473,7 +477,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                   sx={{ bgcolor: "#904cee" }}
                   onClick={handleBackPage}
                 >
-                  Cancel
+                  {language === 'ID' ? 'Batal' : "Cancel"}
                 </Button>
               </Box>
               <Box width="50%">
@@ -486,7 +490,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                   sx={{ bgcolor: "#904cee" }}
                   onClick={handleSubmitData}
                 >
-                  {id ? "Update" : "Save"}
+                  {id ? (language === 'ID' ? 'Ubah' : "Update" ): (language === 'ID' ? 'Simpan' : "Save")}
                 </Button>
               </Box>
             </>
@@ -497,15 +501,15 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
               sx={{ bgcolor: "#904cee" }}
               onClick={handleBackPage}
             >
-              Back
+              {language === 'ID' ? 'Kembali' : "Back"}
             </Button>
           )}
         </Box>
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>Delete Confirmation</DialogTitle>
+          <DialogTitle>{language === 'ID' ? 'Konfirmasi Hapus' : "Delete Confirmation"}</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete?
+              {language === 'ID' ? 'Apakah kamu yakin ingin menghapus data ini?' : "Are you sure you want to delete?"}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -514,14 +518,14 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Cancel
+              {language === 'ID' ? 'Batal' : "Cancel"}
             </Button>
             <Button
               onClick={() => handleDeleteConfirm(cashin)}
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Delete
+              {language === 'ID' ? 'Hapus' : "Delete"}
             </Button>
           </DialogActions>
         </Dialog>
@@ -542,7 +546,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
                   fullWidth
                   id="standard-basic"
                   color="secondary"
-                  label="Description"
+                  label={language === 'ID' ? 'Deskripsi' : "Description"}
                   variant="standard"
                   value={valueDesc}
                   onChange={handlDescChange}
@@ -550,7 +554,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
               </Box>
               <Box width="100%">
                 <NumberTextField
-                  label="Income Amount"
+                  label={language === 'ID' ? 'Jumlah Pemasukan' : "Income Amount"}
                   color="secondary"
                   value={valueIncomeAmount}
                   onChange={setValueIncomeAmount}
@@ -564,7 +568,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Cancel
+              {language === 'ID' ? 'Batal' : "Cancel"}
             </Button>
             <Button
               onClick={() => handleSubmitCashOut(cashin)}
@@ -572,7 +576,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
               sx={{ bgcolor: "#904cee" }}
               disabled={valueDesc && valueIncomeAmount != "0,00" ? false : true}
             >
-              Save
+              {language === 'ID' ? 'Simpan' : "Save"}
             </Button>
           </DialogActions>
         </Dialog>

@@ -54,11 +54,13 @@ const ExpensesList = () => {
   const [expensesList, setExpensesList] = useState<ExpensesListInterface[]>([]);
   const [expensesListById, setExpensesListById] =
     useState<ExpensesListInterface>();
+  const [language, setLanguage] = useState("EN");
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
-
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || "EN");
     if (!isAuthenticated()) {
       // Redirect hanya di klien
       router.push("/login");
@@ -177,7 +179,7 @@ const ExpensesList = () => {
       <div>
         {/* <div> */}
         <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-          Expenses List
+          {language === 'ID' ? 'Daftar Pengeluaran' : "Expenses List"}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 9, md: 11 }}>
@@ -190,7 +192,7 @@ const ExpensesList = () => {
               sx={{ bgcolor: "#904cee" }}
               onClick={handleAdd}
             >
-              Add
+              {language === 'ID' ? 'Tambah' : "Add"}
             </Button>
           </Grid>
         </Grid>
@@ -204,7 +206,7 @@ const ExpensesList = () => {
             height={100}
           >
             <Typography variant="body2" color="textSecondary">
-              No Data
+              {language === 'ID' ? 'Tidak ada data' : "No Data"}
             </Typography>
           </Box>
         ) : (
@@ -231,12 +233,12 @@ const ExpensesList = () => {
                     >
                       <MenuItem onClick={() => handleView(x)}>
                         <Typography component="span" variant="body2">
-                          View
+                          {language === 'ID' ? 'Lihat Data' : "View"}
                         </Typography>
                       </MenuItem>
                       <MenuItem onClick={() => handleEdit(x)}>
                         <Typography component="span" variant="body2">
-                          Edit
+                          {language === 'ID' ? 'Ubah' : "Edit"}
                         </Typography>
                       </MenuItem>
                       <MenuItem
@@ -244,7 +246,7 @@ const ExpensesList = () => {
                         sx={{ color: "error.main" }}
                       >
                         <Typography component="span" variant="body2">
-                          Delete
+                          {language === 'ID' ? 'Hapus' : "Delete"}
                         </Typography>
                       </MenuItem>
                     </Menu>
@@ -291,10 +293,10 @@ const ExpensesList = () => {
         )}
 
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>Delete Confirmation</DialogTitle>
+          <DialogTitle>{language === 'ID' ? 'Konfirmasi Hapus' : "Delete Confirmation"}</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete?
+              {language === 'ID' ? 'Apakah kamu yakin ingin menghapus data ini?' : "Are you sure you want to delete?"}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -303,14 +305,14 @@ const ExpensesList = () => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Cancel
+              {language === 'ID' ? 'Batal' : "Cancel"}
             </Button>
             <Button
               onClick={() => handleDeleteConfirm()}
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Delete
+              {language === 'ID' ? 'Hapus' : "Delete"}
             </Button>
           </DialogActions>
         </Dialog>

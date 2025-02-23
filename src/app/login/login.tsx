@@ -51,11 +51,13 @@ export default function LoginForm() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
+
     // Untuk Register, periksa apakah password dan confirm password cocok
     if (tab === 1 && formData.password !== formData.confirmPassword) {
       setError("Password and Confirm Password do not match");
       return;
+    } else {
+      setLoading(true);
     }
 
     setError(""); // Reset error jika valid

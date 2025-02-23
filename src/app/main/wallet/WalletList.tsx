@@ -71,7 +71,7 @@ const WalletList = () => {
   const [balance, setBalance] = useState<string>("0,00");
   const [disabledSave, setDisabledSave] = useState(false);
   const [mode, setMode] = useState('');
-  
+  const [language, setLanguage] = useState("EN");
 
   function parseFormattedNumber(str: string) {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
@@ -87,6 +87,8 @@ const WalletList = () => {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || "EN");
 
     if (!isAuthenticated()) {
       // Redirect hanya di klien
@@ -160,7 +162,7 @@ const WalletList = () => {
   };
 
   const handleEdit = async (data: WalletListInterface) => {
-    console.log(data, "data");
+
     const dateString = data?.date || "";
     const parsedDate = dayjs(dateString);
     setSelectedDate(parsedDate);
@@ -220,8 +222,6 @@ const WalletList = () => {
 
   const handleSubmit = () => {
     setIsLoading(true);
-    console.log(walletListById);
-
     if (!walletById) {
       const newData = {
         amount: parseFormattedNumber(valueAmount),
@@ -274,7 +274,7 @@ const WalletList = () => {
       <div>
         {/* <div> */}
         <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-          Wallet List
+          {language === 'ID' ? 'Dompet' : "Wallet List"}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 9, md: 11 }}>
@@ -287,7 +287,7 @@ const WalletList = () => {
               sx={{ bgcolor: "#904cee" }}
               onClick={handleAdd}
             >
-              Add
+              {language === 'ID' ? 'Tambah' : "Add"}
             </Button>
           </Grid>
         </Grid>
@@ -301,7 +301,7 @@ const WalletList = () => {
             height={100}
           >
             <Typography variant="body2" color="textSecondary">
-              No Data
+              {language === 'ID' ? 'Tidak ada data' : "No Data"}
             </Typography>
           </Box>
         ) : (
@@ -328,7 +328,7 @@ const WalletList = () => {
                     >
                       <MenuItem onClick={() => handleEdit(x)}>
                         <Typography component="span" variant="body2">
-                          Edit
+                          {language === 'ID' ? 'Ubah' : "Edit"}
                         </Typography>
                       </MenuItem>
                       <MenuItem
@@ -336,7 +336,7 @@ const WalletList = () => {
                         sx={{ color: "error.main" }}
                       >
                         <Typography component="span" variant="body2">
-                          Delete
+                          {language === 'ID' ? 'Hapus' : "Delete"}
                         </Typography>
                       </MenuItem>
                     </Menu>
@@ -367,10 +367,10 @@ const WalletList = () => {
         )}
 
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>Delete Confirmation</DialogTitle>
+          <DialogTitle>{language === 'ID' ? 'Konfirmasi Hapus' : "Delete Confirmation"}</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete?
+              {language === 'ID' ? 'Apakah kamu yakin ingin menghapus data ini?' : "Are you sure you want to delete?"}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -379,14 +379,14 @@ const WalletList = () => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Cancel
+              {language === 'ID' ? 'Batal' : "Cancel"}
             </Button>
             <Button
               onClick={() => handleDeleteConfirm()}
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Delete
+             {language === 'ID' ? 'Hapus' : "Delete"}
             </Button>
           </DialogActions>
         </Dialog>
@@ -397,7 +397,7 @@ const WalletList = () => {
           maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>{mode == 'edit' ? 'Edit' : 'Add'} Wallet</DialogTitle>
+          <DialogTitle>{mode == 'edit' ? 'Ubah Saldo' : 'Tambah Saldo'} {language === 'ID' ? 'Dompet' : "Wallet"}</DialogTitle>
           <DialogContent>
           {isLoading == true && <Loader />}
             <Box width="100%" display="flex" gap={3} flexDirection="column">
@@ -407,6 +407,7 @@ const WalletList = () => {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <MobileDatePicker
                     format="DD/MM/YYYY"
+                    maxDate={dayjs()}
                     slotProps={{
                       textField: {
                         color: "secondary",
@@ -414,7 +415,7 @@ const WalletList = () => {
                         variant: "standard", // ✅ Menggunakan variant "standard"
                       },
                     }}
-                    label="Date"
+                    label={language === 'ID' ? 'Tanggal' : "Date"}
                     value={selectedDate}
                     onChange={(newValue) => setSelectedDate(newValue)}
                   />
@@ -430,7 +431,7 @@ const WalletList = () => {
               </Box> */}
               <Box width="100%">
                 <NumberTextField
-                  label="Wallet Amount"
+                  label={language === 'ID' ? 'Jumlah Saldo' : "Wallet Amount"}
                   color="secondary"
                   value={valueAmount}
                   onChange={setValueAmount}
@@ -444,7 +445,7 @@ const WalletList = () => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Cancel
+              {language === 'ID' ? 'Batal' : "Cancel"}
             </Button>
             <Button
               onClick={() => handleSubmit()}
@@ -457,7 +458,7 @@ const WalletList = () => {
                   : true
               }
             >
-              Save
+              {language === 'ID' ? 'Simpan' : "Save"}
             </Button>
           </DialogActions>
         </Dialog>

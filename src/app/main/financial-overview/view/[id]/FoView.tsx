@@ -64,10 +64,14 @@ const FoView = ({ id, mode }: FoViewInterface) => {
   const [transactionList, setTransactionList] = useState<
     TransactionsDetailsInterface[]
   >([]);
+  const [language, setLanguage] = useState("EN");
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
     const token = localStorage.getItem("access_token");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || "EN");
+
     if (userData && token) {
       const user = JSON.parse(userData);
       setUserId(user?._id);
@@ -128,7 +132,7 @@ const FoView = ({ id, mode }: FoViewInterface) => {
                     color: "secondary", // ✅ Menggunakan variant "standard"
                   },
                 }}
-                label="Release Date"
+                label={language === 'ID' ? 'Tanggal Rilis' : "Release Date"}
                 value={selectedDate}
                 onChange={(newValue) => setSelectedDate(newValue)}
                 disabled={mode == "view" ? true : false}
@@ -146,7 +150,7 @@ const FoView = ({ id, mode }: FoViewInterface) => {
                     color: "secondary", // ✅ Menggunakan variant "standard"
                   },
                 }}
-                label="Start Date"
+                label={language === 'ID' ? 'Tanggal Mulai' : "Start Date"}
                 value={selectedDateStart}
                 onChange={(newValue) => setSelectedDateStart(newValue)}
                 disabled={mode == "view" ? true : false}
@@ -164,7 +168,7 @@ const FoView = ({ id, mode }: FoViewInterface) => {
                     color: "secondary", // ✅ Menggunakan variant "standard"
                   },
                 }}
-                label="End Date"
+                label={language === 'ID' ? 'Tanggal Akhir' : "End Date"}
                 value={selectedDateEnd}
                 onChange={(newValue) => setSelectedDateEnd(newValue)}
                 disabled={mode == "view" ? true : false}
@@ -192,7 +196,7 @@ const FoView = ({ id, mode }: FoViewInterface) => {
               >
                 <Box>
                   <Typography variant="body1" paddingTop={2} fontWeight="bold">
-                    Cash-out List
+                    {language === 'ID' ? 'Riwayat Transaksi' : "History Transactions"}
                   </Typography>
                 </Box>
               </Box>

@@ -26,6 +26,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { fetchDashboard } from "@/utils/dashboard";
 import Loader from "@/components/loader";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import AddCardIcon from '@mui/icons-material/AddCard';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 
 // Contoh Data Dummy
 const initialData = [
@@ -57,10 +61,13 @@ export default function DashboardScreen() {
   const [expensesData, setExpensesData] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [language, setLanguage] = useState("EN");
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || "EN");
     if (!isAuthenticated()) {
       // Redirect hanya di klien
       router.push("/login");
@@ -73,7 +80,7 @@ export default function DashboardScreen() {
             setBalanceData(response?.calculateBalance);
             setIncomeData(response?.calculateIncome);
             setExpensesData(response?.calculateExpenses);
-            setWalletData(response?.calculateWallet)
+            setWalletData(response?.calculateWallet);
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
@@ -93,15 +100,19 @@ export default function DashboardScreen() {
   ) : (
     <Box>
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        Dashboard
+        {language === "ID" ? "Halaman Utama" : "Dashboard"}
       </Typography>
       <Grid container spacing={3}>
         {/* Kartu Net Balance */}
         <Grid item xs={12} md={3}>
           <Card sx={{ backgroundColor: "#504BFD" }}>
             <CardContent>
-              <Typography variant="h6" color="white">
-                Net Balance
+              <Typography
+                variant="h6"
+                color="white"
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <CreditCardIcon /> {language === "ID" ? "Saldo" : "Balance"}
               </Typography>
               <Typography variant="h6" color="white">
                 {formatCurrencyIDR(balanceData)}
@@ -113,8 +124,13 @@ export default function DashboardScreen() {
         <Grid item xs={12} md={3}>
           <Card sx={{ backgroundColor: "#904cee" }}>
             <CardContent>
-              <Typography variant="h6" color="white">
-               My Wallet
+              <Typography
+                variant="h6"
+                color="white"
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <AccountBalanceWalletIcon />{" "}
+                {language === "ID" ? "Dompet" : "My Wallet"}
               </Typography>
               <Typography variant="h6" color="white">
                 {formatCurrencyIDR(walletData)}
@@ -127,8 +143,12 @@ export default function DashboardScreen() {
         <Grid item xs={12} md={3}>
           <Card sx={{ backgroundColor: "#1EC612" }}>
             <CardContent>
-              <Typography variant="h6" color="white">
-                Total Income
+            <Typography
+                variant="h6"
+                color="white"
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+               <AddCardIcon /> {language === "ID" ? "Total Pemasukan" : "Total Income"}
               </Typography>
               <Typography variant="h6" color="white">
                 {formatCurrencyIDR(incomeData)}
@@ -141,8 +161,12 @@ export default function DashboardScreen() {
         <Grid item xs={12} md={3}>
           <Card sx={{ backgroundColor: "#DC1717" }}>
             <CardContent>
-              <Typography variant="h6" color="white">
-                Total Expenses
+            <Typography
+                variant="h6"
+                color="white"
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+              <ShoppingCartCheckoutIcon />  {language === "ID" ? "Total Pengeluaran" : "Total Expenses"}
               </Typography>
               <Typography variant="h6" color="white">
                 {formatCurrencyIDR(expensesData)}

@@ -43,10 +43,13 @@ const UserList = () => {
   const [users, setUsers] = useState<UserInterface[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [language, setLanguage] = useState("EN");
 
   useEffect(() => {
     // Ambil role dari localStorage
     const userData = localStorage.getItem("user");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || 'EN');
     if (userData) {
       const user = JSON.parse(userData);
       setRole(user?.role || "user");
@@ -134,7 +137,7 @@ const UserList = () => {
     <div>
       {/* <div> */}
       <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-        User List
+       {language === 'ID' ? 'Daftar Pengguna' : "User List"}
       </Typography>
       <Grid container spacing={2}>
         <Grid size={{ xs: 9, md: 11 }}>
@@ -147,7 +150,7 @@ const UserList = () => {
             sx={{ bgcolor: "#904cee" }}
             onClick={handleAdd}
           >
-            Add
+            {language === 'ID' ? 'Tambah' : 'Add'}
           </Button>
         </Grid>
       </Grid>
@@ -179,21 +182,31 @@ const UserList = () => {
                   >
                     <MenuItem onClick={() => handleView(x)}>
                       <Typography component="span" variant="body2">
-                        View
+                        {language === 'ID' ? 'Lihat Data' : "View"}
                       </Typography>
                     </MenuItem>
                     <MenuItem onClick={() => handleEdit(x)}>
                       <Typography component="span" variant="body2">
-                        Edit
+                        {language === 'ID' ? 'Ubah' : "Edit"}
                       </Typography>
                     </MenuItem>
-                    {x?.status === "Active" && (
+                    {x?.status === "active" && (
                       <MenuItem
                         onClick={handleDeleteClick}
                         sx={{ color: "error.main" }}
                       >
                         <Typography component="span" variant="body2">
-                          Inactive
+                          {language === 'ID' ? 'Blokir' : "Inactive"}
+                        </Typography>
+                      </MenuItem>
+                    )}
+                    {x?.status === "inactive" && (
+                      <MenuItem
+                        onClick={handleDeleteClick}
+                        sx={{ color: "success.main" }}
+                      >
+                        <Typography component="span" variant="body2">
+                          {language === 'ID' ? 'Aktifkan' : "Active"}
                         </Typography>
                       </MenuItem>
                     )}
@@ -247,10 +260,10 @@ const UserList = () => {
         )}
       </List>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Inactive Confirmation</DialogTitle>
+        <DialogTitle>{language === 'ID' ? 'Konfirmasi Blokir' : "Inactive Confirmation"}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to Inactive?
+            {language === 'ID' ? 'Apakah kamu yakin ingin blokir akun ini?' : "Are you sure you want to Inactive?"}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -259,14 +272,14 @@ const UserList = () => {
             variant="contained"
             sx={{ bgcolor: "#904cee" }}
           >
-            Cancel
+            {language === 'ID' ? 'Batal' : "Cancel"}
           </Button>
           <Button
             onClick={() => handleDeleteConfirm}
             variant="contained"
             sx={{ bgcolor: "#904cee" }}
           >
-            Process
+            {language === 'ID' ? 'Proses' : "Process"}
           </Button>
         </DialogActions>
       </Dialog>

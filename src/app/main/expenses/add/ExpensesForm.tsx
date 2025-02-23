@@ -77,9 +77,6 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   const [isLoading, setIsLoading] = useState(true);
   const [amountType, setAmountType] = useState("");
 
-  console.log(amountType, 'amountType');
-  
-
   function parseFormattedNumber(str: string) {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
   }
@@ -88,6 +85,9 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   const [allCashin, setAllCashin] = useState<ExpensesDetailsFormInterface[]>(
     []
   );
+
+  const [language, setLanguage] = useState("EN");
+  
 
   const formatNumberToIDR = (num: number): string => {
     return new Intl.NumberFormat("id-ID", {
@@ -111,6 +111,9 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   useEffect(() => {
     const userData = localStorage.getItem("user");
     const token = localStorage.getItem("access_token");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || "EN");
+
     if (userData && token) {
       const user = JSON.parse(userData);
       setUserId(user?._id);
@@ -158,8 +161,6 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
       setAmountType("")
     } else {
       if (cashin) {
-        console.log(cashin);
-        
         setValueDesc(cashin?.description);
         const formatAmount = formatNumberToIDR(cashin?.amount);
         setValueExpensesAmount(formatAmount);
@@ -300,7 +301,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
       {isLoading === true && <Loader />}
       <div>
         <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-          Expenses Form
+          {language === 'ID' ? 'Form Pengeluaran' : "Expenses Form"}
         </Typography>
         <Box
           width="100%"
@@ -315,7 +316,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               disabled={mode == "view" ? true : false}
               fullWidth
               id="standard-basic"
-              label="Title"
+              label={language === 'ID' ? 'Judul' : "Title"}
               variant="standard"
               color="secondary"
               value={valueTitle}
@@ -326,6 +327,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <MobileDatePicker
                 format="DD/MM/YYYY"
+                maxDate={dayjs()}
                 slotProps={{
                   textField: {
                     fullWidth: true, // ✅ Agar input full width
@@ -333,7 +335,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                     color: "secondary", // ✅ Menggunakan variant "standard"
                   },
                 }}
-                label="Date"
+                label={language === 'ID' ? 'Tanggal' : "Date"}
                 value={selectedDate}
                 onChange={(newValue) => setSelectedDate(newValue)}
                 disabled={mode == "view" ? true : false}
@@ -350,7 +352,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                 sx={{ bgcolor: "#904cee" }}
                 onClick={handleAdd}
               >
-                Add Cash-out
+                {language === 'ID' ? 'Tambah Uang Keluar' : "Add Cash-out"}
               </Button>
             </Box>
           )}
@@ -377,7 +379,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                       paddingTop={2}
                       fontWeight="bold"
                     >
-                      Cash-out List
+                      {language === 'ID' ? 'Daftar Uang Keluar' : "Cash-out List"}
                     </Typography>
                   </Box>
                 </Box>
@@ -402,7 +404,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                   height={100}
                 >
                   <Typography variant="body2" color="textSecondary">
-                    No Data
+                    {language === 'ID' ? 'Tidak ada data' : "No Data"}
                   </Typography>
                 </Box>
               ) : (
@@ -432,7 +434,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                             >
                               <MenuItem onClick={() => handleEdit(x)}>
                                 <Typography component="span" variant="body2">
-                                  Edit
+                                  {language === 'ID' ? 'Ubah' : "Edit"}
                                 </Typography>
                               </MenuItem>
                               <MenuItem
@@ -440,7 +442,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                                 sx={{ color: "error.main" }}
                               >
                                 <Typography component="span" variant="body2">
-                                  Delete
+                                  {language === 'ID' ? 'Hapus' : "Delete"}
                                 </Typography>
                               </MenuItem>
                             </Menu>
@@ -511,7 +513,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                   sx={{ bgcolor: "#904cee" }}
                   onClick={handleBackPage}
                 >
-                  Cancel
+                  {language === 'ID' ? 'Ubah' : "Cancel"}
                 </Button>
               </Box>
               <Box width="50%">
@@ -524,7 +526,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                   sx={{ bgcolor: "#904cee" }}
                   onClick={handleSubmitData}
                 >
-                  {id ? "Update" : "Save"}
+                  {id ? (language === 'ID' ? 'Ubah' : "Update") : (language === 'ID' ? 'Simpan' : "Save")}
                 </Button>
               </Box>
             </>
@@ -535,15 +537,15 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               sx={{ bgcolor: "#904cee" }}
               onClick={handleBackPage}
             >
-              Back
+              {language === 'ID' ? 'Kembali' : "Back"}
             </Button>
           )}
         </Box>
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>Delete Confirmation</DialogTitle>
+          <DialogTitle>{language === 'ID' ? 'Konfirmasi Hapus' : "Delete Confirmation"}</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete?
+              {language === 'ID' ? 'Apakah kamu yakin ingin menghapus data ini?' : "Are you sure you want to delete?"}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -552,14 +554,14 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Cancel
+              {language === 'ID' ? 'Batal' : "Cancel"}
             </Button>
             <Button
               onClick={() => handleDeleteConfirm(cashin)}
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Delete
+              {language === 'ID' ? 'Batal' : "Delete"}
             </Button>
           </DialogActions>
         </Dialog>
@@ -579,7 +581,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                 <TextField
                   fullWidth
                   id="standard-basic"
-                  label="Description"
+                  label={language === 'ID' ? 'Deskripsi' : "Description"}
                   color="secondary"
                   variant="standard"
                   value={valueDesc}
@@ -598,7 +600,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                     <TextField
                       {...params}
                       color="secondary"
-                      label="Payment Type"
+                      label={language === 'ID' ? 'Tipe Pembayaran' : "Payment Type"}
                       variant="standard"
                     />
                   )}
@@ -606,7 +608,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               </Box>
               <Box width="100%">
                 <NumberTextField
-                  label="Expenses Amount"
+                  label={language === 'ID' ? 'Jumlah Pengeluaran' : "Expenses Amount"}
                   color="secondary"
                   value={valueExpensesAmount}
                   onChange={setValueExpensesAmount}
@@ -620,7 +622,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Cancel
+              {language === 'ID' ? 'Batal' : "Cancel"}
             </Button>
             <Button
               onClick={() => handleSubmitCashOut(cashin)}
@@ -630,7 +632,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
                 amountType && valueDesc && valueExpensesAmount != "0,00" ? false : true
               }
             >
-              Save
+              {language === 'ID' ? 'Simpan' : "Save"}
             </Button>
           </DialogActions>
         </Dialog>

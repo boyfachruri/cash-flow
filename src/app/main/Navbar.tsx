@@ -78,42 +78,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-const dashboard = {
-  id: 1,
-  name: "Dashboard",
-  link: "/main/dashboard",
-  icons: <GridViewIcon />,
-};
 
-const userList = {
-  id: 5,
-  name: "User List",
-  link: "/main/user-list",
-  icons: <PeopleIcon />,
-};
-
-const listApp = [
-  { id: 2, name: "Income", link: "/main/income", icons: <AddCardIcon /> },
-  {
-    id: 3,
-    name: "My Wallet",
-    link: "/main/wallet",
-    icons: <AccountBalanceWalletIcon />,
-  },
-  {
-    id: 4,
-    name: "Expenses",
-    link: "/main/expenses",
-    icons: <ShoppingCartCheckoutIcon />,
-  },
-];
-
-const transactionList = {
-  id: 6,
-  name: "Financial Overview",
-  link: "/main/financial-overview",
-  icons: <CalculateIcon />,
-};
 
 const limitToOneWord = (text: string) => {
   return text.split(" ")[0]; // Ambil hanya kata pertama
@@ -134,11 +99,50 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [language, setLanguage] = useState("ID"); // Default ke Indonesia
+  const [language, setLanguage] = useState("EN"); // Default ke Indonesia
+
+  const dashboard = {
+    id: 1,
+    name: language === 'ID' ? "Halaman Utama" : "Dashboard",
+    link: "/main/dashboard",
+    icons: <GridViewIcon />,
+  };
+  
+  const userList = {
+    id: 5,
+    name:  language === 'ID' ? "Daftar Pengguna" :"User List",
+    link: "/main/user-list",
+    icons: <PeopleIcon />,
+  };
+  
+  const listApp = [
+    { id: 2, name: language === 'ID' ? "Pemasukan" : "Income", link: "/main/income", icons: <AddCardIcon /> },
+    {
+      id: 3,
+      name:  language === 'ID' ? "Dompet" : "My Wallet",
+      link: "/main/wallet",
+      icons: <AccountBalanceWalletIcon />,
+    },
+    {
+      id: 4,
+      name:  language === 'ID' ? "Pengeluaran" : "Expenses",
+      link: "/main/expenses",
+      icons: <ShoppingCartCheckoutIcon />,
+    },
+  ];
+  
+  const transactionList = {
+    id: 6,
+    name:  language === 'ID' ? "Ringkasan Keuangan" : "Financial Overview",
+    link: "/main/financial-overview",
+    icons: <CalculateIcon />,
+  };
 
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
-    localStorage.setItem("language", lang); // Simpan ke localStorage agar tetap tersimpan
+    localStorage.setItem("language", lang);
+    handleCloseLangMenu()
+    window.location.reload();
   };
 
   // State untuk menu bahasa
@@ -158,6 +162,8 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || 'EN');
     if (!isAuthenticated()) {
       // Redirect hanya di klien
       router.push("/login");
@@ -239,7 +245,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               Hi, {limitToOneWord(fullName)}
             </Typography>
             <Box sx={{ flexGrow: 1 }} /> {/* Spacer agar elemen di kanan */}
-            {/* <IconButton color="inherit" onClick={handleClickLangMenu}>
+            <IconButton color="inherit" onClick={handleClickLangMenu}>
               <Typography fontWeight="bold">{language}</Typography>
             </IconButton>
             <Menu
@@ -259,7 +265,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               >
                 English
               </MenuItem>
-            </Menu> */}
+            </Menu>
             <IconButton color="inherit" onClick={handleClickUserMenu}>
               <AccountCircleIcon />
             </IconButton>

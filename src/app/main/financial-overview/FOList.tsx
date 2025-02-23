@@ -63,11 +63,14 @@ const FoList = () => {
   );
   const [selectedDateEnd, setSelectedDateEnd] = useState<Dayjs | null>(null);
   const [userId, setUserId] = useState("");
+   const [language, setLanguage] = useState("EN");
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
-
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || "EN");
+    
     if (!isAuthenticated()) {
       // Redirect hanya di klien
       router.push("/login");
@@ -177,7 +180,7 @@ const FoList = () => {
       <div>
         {/* <div> */}
         <Typography variant="h6" paddingBottom={3} fontWeight="bold">
-          Financial Overview
+          {language === 'ID' ? 'Ringkasan Keuangan' :  "Financial Overview"}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 9, md: 11 }}>
@@ -190,7 +193,7 @@ const FoList = () => {
               sx={{ bgcolor: "#904cee" }}
               onClick={handleAdd}
             >
-              Add
+              {language === 'ID' ? 'Tambah' :  "Add"}
             </Button>
           </Grid>
         </Grid>
@@ -204,7 +207,7 @@ const FoList = () => {
             height={100}
           >
             <Typography variant="body2" color="textSecondary">
-              No Data
+              {language === 'ID' ? 'Tidak ada data' :  "No Data"}
             </Typography>
           </Box>
         ) : (
@@ -231,7 +234,7 @@ const FoList = () => {
                     >
                       <MenuItem onClick={() => handleView(x)}>
                         <Typography component="span" variant="body2">
-                          View
+                          {language === 'ID' ? 'Lihat Data' : "View"}
                         </Typography>
                       </MenuItem>
                       {/* <MenuItem onClick={() => handleEdit(x)}>
@@ -260,7 +263,7 @@ const FoList = () => {
                           variant="body2"
                           fontWeight="bold"
                         >
-                          Start Date: {DateFormatter(String(x?.fromDate))}
+                          {language === 'ID' ? 'Tanggal Mulai:' : "Start Date:"} {DateFormatter(String(x?.fromDate))}
                         </Typography>
                         <Typography component="span" variant="body2">
                           {DateFormatter(String(x?.date))}
@@ -276,7 +279,7 @@ const FoList = () => {
                           variant="body2"
                           fontWeight="bold"
                         >
-                          End Date: {DateFormatter(String(x?.toDate))}
+                          {language === 'ID' ? 'Tanggal Akhir:' : "End Date:"} {DateFormatter(String(x?.toDate))}
                         </Typography>
                         {/* <Typography component="span" variant="body2" >
                   {x?.tanggal}
@@ -314,7 +317,7 @@ const FoList = () => {
                         variant: "standard", // ✅ Menggunakan variant "standard"
                       },
                     }}
-                    label="Release Date"
+                    label={language === 'ID' ? 'Tanggal Rilis' : "Release Date"}
                     value={selectedDate}
                     onChange={(newValue) => setSelectedDate(newValue)}
                   />
@@ -324,7 +327,7 @@ const FoList = () => {
                 <Box width="100%">
                   <MobileDatePicker
                     format="DD/MM/YYYY"
-                    label="Start Date"
+                    label={language === 'ID' ? 'Tanggal Mulai' : "Start Date"}
                     maxDate={selectedDate || undefined}
                     value={selectedDateStart}
                     onChange={handleStartDateChange}
@@ -340,7 +343,7 @@ const FoList = () => {
                 <Box width="100%" mt={2}>
                   <MobileDatePicker
                     format="DD/MM/YYYY"
-                    label="End Date"
+                    label={language === 'ID' ? 'Tanggal Akhir' : "End Date"}
                     value={selectedDateEnd}
                     onChange={handleEndDateChange}
                     maxDate={selectedDate || undefined}
@@ -363,7 +366,7 @@ const FoList = () => {
               variant="contained"
               sx={{ bgcolor: "#904cee" }}
             >
-              Cancel
+              {language === 'ID' ? 'Batal' : "Cancel"}
             </Button>
             <Button
               onClick={() => handleSubmit()}
@@ -376,7 +379,7 @@ const FoList = () => {
                   : true
               }
             >
-              Save
+              {language === 'ID' ? 'Simpan' : "Save"}
             </Button>
           </DialogActions>
         </Dialog>
