@@ -28,7 +28,6 @@ interface FormData {
   confirmPassword: string;
 }
 
-
 export default function LoginForm() {
   const router = useRouter();
   const [tab, setTab] = useState<number>(0);
@@ -84,7 +83,6 @@ export default function LoginForm() {
         await registerUser(formData); // Panggil registerUser untuk registrasi
         setOpenDialog(true);
         setDialogMessage("Registration successful, please login.");
-        
       }
     } catch (err) {
       if (tab === 0) {
@@ -104,7 +102,7 @@ export default function LoginForm() {
   // const handleSubmit = async (e: React.FormEvent) => {
   //   e.preventDefault();
   //   setLoading(true);
-    
+
   //   try {
   //     const response = await fetch("/api/submit", {
   //       method: "POST",
@@ -128,175 +126,178 @@ export default function LoginForm() {
 
   return (
     <>
-    {
-      loading == true && (
-        <Loader />
-      )
-    }
-          <Container>
-      <Container
-        maxWidth="sm"
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-        }}
-      >
-        <Box sx={{ width: "100%", maxWidth: 600 }}>
-          <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2 }}>
-            <CardContent>
-              <Typography
-                fontFamily="Roboto"
-                fontWeight="bold"
-                color="secondary"
-                variant="h4"
-                align="center"
-                gutterBottom
-              >
-                R3g Cashflow
-              </Typography>
-              {/* <Typography variant="h4" align="center" gutterBottom>
+      {loading == true && <Loader />}
+      {/* <Container> */}
+        <Container
+          maxWidth="sm"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "100vh",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          <Box sx={{ width: "100%", maxWidth: 600 }}>
+            <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2 }}>
+              <CardContent>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  mb={2}
+                >
+                  <img
+                    src="/r3g-cashflow.png" // Sesuaikan path gambar
+                    alt="Logo"
+                    style={{
+                      width: 250,
+                      // height: 150,
+                      // marginRight: 3,
+                      objectFit: "contain",
+                    }} // Tambah objectFit agar tidak terdistorsi
+                  />
+                </Box>
+
+                {/* <Typography variant="h4" align="center" gutterBottom>
                 Cashflow
               </Typography> */}
-              <Tabs
-                textColor="secondary"
-                indicatorColor="secondary"
-                value={tab}
-                onChange={(_, newValue: number) => setTab(newValue)}
-                centered
-              >
-                <Tab label="Login" />
-                <Tab label="Register" />
-              </Tabs>
-              <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-                {tab === 1 ? (
-                  <>
-                    <TextField
-                      fullWidth
-                      color="secondary"
-                      label="Username"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      margin="normal"
-                      variant="standard"
-                      required
-                    />
-                    <TextField
-                      fullWidth
-                      color="secondary"
-                      label="Full Name"
-                      name="fullname"
-                      value={formData.fullname}
-                      onChange={handleChange}
-                      margin="normal"
-                      variant="standard"
-                      required
-                    />
-                    <TextField
-                      fullWidth
-                      color="secondary"
-                      label="Email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      margin="normal"
-                      variant="standard"
-                      required
-                    />
-                    <TextField
-                      fullWidth
-                      color="secondary"
-                      label="Password"
-                      name="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      margin="normal"
-                      variant="standard"
-                      required
-                    />
-                    <TextField
-                      fullWidth
-                      color="secondary"
-                      label="Confirm Password"
-                      name="confirmPassword"
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      margin="normal"
-                      variant="standard"
-                      required
-                    />
-                  </>
-                ) : (
-                  <>
-                    <TextField
-                      fullWidth
-                      color="secondary"
-                      label="Username"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      margin="normal"
-                      variant="standard"
-                      required
-                    />
-                    <TextField
-                      fullWidth
-                      color="secondary"
-                      label="Password"
-                      name="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      margin="normal"
-                      variant="standard"
-                      required
-                    />
-                  </>
-                )}
-
-                {error && (
-                  <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                    {error}
-                  </Typography>
-                )}
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="secondary"
-                  fullWidth
-                  sx={{ mt: 2 }}
+                <Tabs
+                  textColor="secondary"
+                  indicatorColor="secondary"
+                  value={tab}
+                  onChange={(_, newValue: number) => setTab(newValue)}
+                  centered
                 >
-                  {tab === 0 ? "Login" : "Register"}
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-        <Dialog open={openDialog} onClose={handleCloseDialog}>
-          <DialogTitle>
-            {tab === 0 ? "Login Failed" : "Registration Successful"}
-          </DialogTitle>
-          <DialogContent>
-            <p>{dialogMessage}</p>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} color="primary">
-              OK
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Container>
-    </Container>
-    </>
+                  <Tab label="Login" />
+                  <Tab label="Register" />
+                </Tabs>
+                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+                  {tab === 1 ? (
+                    <>
+                      <TextField
+                        fullWidth
+                        color="secondary"
+                        label="Username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        margin="normal"
+                        variant="standard"
+                        required
+                      />
+                      <TextField
+                        fullWidth
+                        color="secondary"
+                        label="Full Name"
+                        name="fullname"
+                        value={formData.fullname}
+                        onChange={handleChange}
+                        margin="normal"
+                        variant="standard"
+                        required
+                      />
+                      <TextField
+                        fullWidth
+                        color="secondary"
+                        label="Email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        margin="normal"
+                        variant="standard"
+                        required
+                      />
+                      <TextField
+                        fullWidth
+                        color="secondary"
+                        label="Password"
+                        name="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        margin="normal"
+                        variant="standard"
+                        required
+                      />
+                      <TextField
+                        fullWidth
+                        color="secondary"
+                        label="Confirm Password"
+                        name="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        margin="normal"
+                        variant="standard"
+                        required
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <TextField
+                        fullWidth
+                        color="secondary"
+                        label="Username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        margin="normal"
+                        variant="standard"
+                        required
+                      />
+                      <TextField
+                        fullWidth
+                        color="secondary"
+                        label="Password"
+                        name="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        margin="normal"
+                        variant="standard"
+                        required
+                      />
+                    </>
+                  )}
 
+                  {error && (
+                    <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                      {error}
+                    </Typography>
+                  )}
+
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    // color="secondary"
+                    fullWidth
+                    sx={{ mt: 2, backgroundColor: '#904cee' }}
+                  >
+                    {tab === 0 ? "Login" : "Register"}
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+          <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <DialogTitle>
+              {tab === 0 ? "Login Failed" : "Registration Successful"}
+            </DialogTitle>
+            <DialogContent>
+              <p>{dialogMessage}</p>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                OK
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Container>
+      {/* </Container> */}
+    </>
   );
 }

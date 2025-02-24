@@ -78,8 +78,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-
-
 const limitToOneWord = (text: string) => {
   return text.split(" ")[0]; // Ambil hanya kata pertama
 };
@@ -103,37 +101,42 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
 
   const dashboard = {
     id: 1,
-    name: language === 'ID' ? "Halaman Utama" : "Dashboard",
+    name: language === "ID" ? "Halaman Utama" : "Dashboard",
     link: "/main/dashboard",
     icons: <GridViewIcon />,
   };
-  
+
   const userList = {
     id: 5,
-    name:  language === 'ID' ? "Daftar Pengguna" :"User List",
+    name: language === "ID" ? "Daftar Pengguna" : "User List",
     link: "/main/user-list",
     icons: <PeopleIcon />,
   };
-  
+
   const listApp = [
-    { id: 2, name: language === 'ID' ? "Pemasukan" : "Income", link: "/main/income", icons: <AddCardIcon /> },
+    {
+      id: 2,
+      name: language === "ID" ? "Pemasukan" : "Income",
+      link: "/main/income",
+      icons: <AddCardIcon />,
+    },
     {
       id: 3,
-      name:  language === 'ID' ? "Dompet" : "My Wallet",
+      name: language === "ID" ? "Dompet" : "My Wallet",
       link: "/main/wallet",
       icons: <AccountBalanceWalletIcon />,
     },
     {
       id: 4,
-      name:  language === 'ID' ? "Pengeluaran" : "Expenses",
+      name: language === "ID" ? "Pengeluaran" : "Expenses",
       link: "/main/expenses",
       icons: <ShoppingCartCheckoutIcon />,
     },
   ];
-  
+
   const transactionList = {
     id: 6,
-    name:  language === 'ID' ? "Ringkasan Keuangan" : "Financial Overview",
+    name: language === "ID" ? "Ringkasan Keuangan" : "Financial Overview",
     link: "/main/financial-overview",
     icons: <CalculateIcon />,
   };
@@ -141,7 +144,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
     localStorage.setItem("language", lang);
-    handleCloseLangMenu()
+    handleCloseLangMenu();
     window.location.reload();
   };
 
@@ -163,7 +166,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
     const lang = localStorage.getItem("language");
-    setLanguage(lang || 'EN');
+    setLanguage(lang || "EN");
     if (!isAuthenticated()) {
       // Redirect hanya di klien
       router.push("/login");
@@ -293,14 +296,14 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
                 <ListItemIcon>
                   <AccountCircleIcon />
-                  &nbsp; {language === 'ID' ? "Akun" : "Account"}
+                  &nbsp; {language === "ID" ? "Akun" : "Account"}
                 </ListItemIcon>
               </MenuItem>
               {/* Logout */}
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>
                   <ExitToAppIcon />
-                  &nbsp; {language === 'ID' ? "Keluar" : "Logout"}
+                  &nbsp; {language === "ID" ? "Keluar" : "Logout"}
                 </ListItemIcon>
               </MenuItem>
             </Menu>
@@ -336,16 +339,18 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           }}
         >
           <DrawerHeader>
-            <Box width="100%" display="flex">
+            <Box width="100%" display="flex" alignItems="center">
               <Box
                 width="50%"
                 display="flex"
                 alignItems="center"
                 justifyContent="flex-start"
               >
-                <Typography fontWeight="bold" color="secondary">
-                  R3g Cashflow
-                </Typography>
+                <img
+                  src="/r3g-cashflow.png" // Ganti dengan path gambar yang sesuai
+                  alt="Logo"
+                  style={{ width: 120, marginRight: 8 }} // Sesuaikan ukuran gambar
+                />
               </Box>
               <Box width="50%" display="flex" justifyContent="flex-end">
                 <IconButton onClick={handleDrawerClose}>
@@ -358,6 +363,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               </Box>
             </Box>
           </DrawerHeader>
+
           <Divider />
           <List>
             <ListItem key={dashboard.id} disablePadding>
@@ -444,27 +450,27 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           </List>
           <Divider />
           <List>
-              <ListItem key={transactionList.id} disablePadding>
-                <ListItemButton
-                  onClick={() => router.push(transactionList.link)}
-                  sx={{
-                    bgcolor: pathname.startsWith(transactionList.link)
-                      ? "#EEE6FF"
-                      : "transparent",
-                    borderLeft: pathname.startsWith(transactionList.link)
-                      ? "4px solid #904cee"
-                      : "none",
-                    "&:hover": {
-                      bgcolor: "#EEE6FF",
-                    },
-                  }}
-                >
-                  <ListItemIcon>{transactionList.icons}</ListItemIcon>
-                  <ListItemText primary={transactionList.name} />
-                </ListItemButton>
-              </ListItem>
-            </List>
-            <Divider />
+            <ListItem key={transactionList.id} disablePadding>
+              <ListItemButton
+                onClick={() => router.push(transactionList.link)}
+                sx={{
+                  bgcolor: pathname.startsWith(transactionList.link)
+                    ? "#EEE6FF"
+                    : "transparent",
+                  borderLeft: pathname.startsWith(transactionList.link)
+                    ? "4px solid #904cee"
+                    : "none",
+                  "&:hover": {
+                    bgcolor: "#EEE6FF",
+                  },
+                }}
+              >
+                <ListItemIcon>{transactionList.icons}</ListItemIcon>
+                <ListItemText primary={transactionList.name} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+          <Divider />
         </Drawer>
 
         <Main>
@@ -474,7 +480,9 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
 
         <Snackbar open={openSnackbar} autoHideDuration={3000}>
           <Alert severity="warning" variant="filled">
-            {language === 'ID' ? "Sesi kamu sudah berakhir, silahkan masuk kembali" : "Your session has expired. Please log in again."}
+            {language === "ID"
+              ? "Sesi kamu sudah berakhir, silahkan masuk kembali"
+              : "Your session has expired. Please log in again."}
           </Alert>
         </Snackbar>
       </Box>
