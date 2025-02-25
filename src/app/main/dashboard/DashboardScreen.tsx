@@ -112,7 +112,7 @@ export default function DashboardScreen() {
                 color="white"
                 sx={{ display: "flex", alignItems: "center", gap: 1 }}
               >
-                <CreditCardIcon /> {language === "ID" ? "Saldo" : "Balance"}
+                <CreditCardIcon /> {language === "ID" ? "Rekening Utama" : "Main Balance"}
               </Typography>
               <Typography variant="h6" color="white">
                 {formatCurrencyIDR(balanceData)}

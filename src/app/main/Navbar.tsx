@@ -43,6 +43,7 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { fetchDashboard } from "@/utils/dashboard";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import Loader from "@/components/loader";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
 
 const drawerWidth = 240;
 
@@ -94,6 +95,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [openMenu, setOpenMenu] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [walletData, setWalletData] = useState(0);
+  const [primaryBalance, setPrimaryBalance] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -180,6 +182,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           try {
             const response = await fetchDashboard(token, user?._id);
             setWalletData(response?.calculateWallet);
+            setPrimaryBalance(response?.calculateBalance)
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
@@ -280,6 +283,16 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               MenuListProps={{ "aria-labelledby": "basic-button" }}
             >
               {/* Saldo */}
+              <MenuItem disableRipple>
+                {/* <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}> */}
+                <CreditCardIcon 
+                fontSize="small"
+                  sx={{ mr: 1, color: "#504BFD" }}/>
+                <Typography variant="body2" color="#504BFD" fontWeight="bold">
+                  {formatCurrencyIDR(primaryBalance)}
+                </Typography>
+                {/* </Box> */}
+              </MenuItem>
               <MenuItem disableRipple>
                 {/* <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}> */}
                 <AccountBalanceWalletIcon
