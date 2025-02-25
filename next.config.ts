@@ -9,13 +9,14 @@
 
 // export default nextConfig;
 
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development', // Nonaktifkan PWA di development
+const withPWA = require("next-pwa")({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
 });
 
 module.exports = withPWA({
-  // Konfigurasi Next.js lainnya
+  reactStrictMode: true,
 });
 
 

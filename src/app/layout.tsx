@@ -3,6 +3,7 @@ import QueryProvider from "@/components/QueryProvider";
 export const metadata = {
   title: "R3g Cashflow",
   description: "Created by R3g Software",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
