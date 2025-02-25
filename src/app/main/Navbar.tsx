@@ -101,6 +101,8 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showButton, setShowButton] = useState(false);
+  
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   const [language, setLanguage] = useState("EN"); // Default ke Indonesia
 
@@ -198,6 +200,25 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
       } // Jika sudah login, selesai loading
     }
   }, []);
+
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").then((registration) => {
+        registration.addEventListener("updatefound", () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener("statechange", () => {
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                setUpdateAvailable(true);
+              }
+            });
+          }
+        });
+      });
+    }
+  }, []);
+
 
   useEffect(() => {
     const checkAuth = () => {
@@ -539,6 +560,17 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           </Alert>
         </Snackbar>
       </Box>
+      <Dialog open={updateAvailable}>
+        <DialogTitle>Pembaruan Tersedia</DialogTitle>
+        <DialogContent>
+          Versi terbaru aplikasi telah tersedia. Silakan muat ulang halaman untuk mendapatkan pembaruan.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => window.location.reload()} color="primary">
+            Perbarui Sekarang
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
