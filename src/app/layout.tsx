@@ -1,4 +1,5 @@
 import QueryProvider from "@/components/QueryProvider";
+import InstallPWAButton from "./PwaButton";
 
 export const metadata = {
   title: "R3g Cashflow",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <QueryProvider>
       <html lang="en">
-        <body>{children}</body>
+        <body>
+          {children}
+        </body>
       </html>
     </QueryProvider>
   );

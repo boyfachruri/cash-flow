@@ -44,6 +44,7 @@ import { fetchDashboard } from "@/utils/dashboard";
 import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import Loader from "@/components/loader";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
+import DownloadIcon from "@mui/icons-material/Download";
 
 const drawerWidth = 240;
 
@@ -98,6 +99,8 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [primaryBalance, setPrimaryBalance] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showButton, setShowButton] = useState(false);
 
   const [language, setLanguage] = useState("EN"); // Default ke Indonesia
 
@@ -182,7 +185,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           try {
             const response = await fetchDashboard(token, user?._id);
             setWalletData(response?.calculateWallet);
-            setPrimaryBalance(response?.calculateBalance)
+            setPrimaryBalance(response?.calculateBalance);
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
@@ -227,6 +230,35 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("user");
     localStorage.removeItem("access_token");
     router.push("/login"); // Redirect ke halaman login
+  };
+
+  useEffect(() => {
+    const handler = (event: any) => {
+      event.preventDefault(); // Mencegah pop-up otomatis
+      setDeferredPrompt(event);
+      setShowButton(true); // Menampilkan tombol install
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === "accepted") {
+          console.log("User accepted the install prompt");
+        } else {
+          console.log("User dismissed the install prompt");
+        }
+        setDeferredPrompt(null);
+        setShowButton(false); // Sembunyikan tombol setelah install
+      });
+    }
   };
 
   return (
@@ -285,9 +317,10 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               {/* Saldo */}
               <MenuItem disableRipple>
                 {/* <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}> */}
-                <CreditCardIcon 
-                fontSize="small"
-                  sx={{ mr: 1, color: "#504BFD" }}/>
+                <CreditCardIcon
+                  fontSize="small"
+                  sx={{ mr: 1, color: "#504BFD" }}
+                />
                 <Typography variant="body2" color="#504BFD" fontWeight="bold">
                   {formatCurrencyIDR(primaryBalance)}
                 </Typography>
@@ -305,6 +338,13 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 {/* </Box> */}
               </MenuItem>
               <Divider /> {/* Pemisah */}
+              <MenuItem onClick={handleInstallClick}>
+                <ListItemIcon>
+                  <DownloadIcon />
+                  &nbsp; {language === "ID" ? "Install App" : "Install App"}
+                </ListItemIcon>
+              </MenuItem>
+              <Divider />
               {/* Akun */}
               <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
                 <ListItemIcon>

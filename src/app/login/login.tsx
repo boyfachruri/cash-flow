@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -96,6 +96,29 @@ export default function LoginForm() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault(); // Mencegah notifikasi default
+      setDeferredPrompt(event);
+    });
+  }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === "accepted") {
+          console.log("User accepted the install prompt");
+        } else {
+          console.log("User dismissed the install prompt");
+        }
+        setDeferredPrompt(null);
+      });
     }
   };
 
