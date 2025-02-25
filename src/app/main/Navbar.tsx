@@ -101,7 +101,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showButton, setShowButton] = useState(false);
-  
+
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   const [language, setLanguage] = useState("EN"); // Default ke Indonesia
@@ -201,7 +201,6 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").then((registration) => {
@@ -209,7 +208,10 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener("statechange", () => {
-              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              if (
+                newWorker.state === "installed" &&
+                navigator.serviceWorker.controller
+              ) {
                 setUpdateAvailable(true);
               }
             });
@@ -218,7 +220,6 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
       });
     }
   }, []);
-
 
   useEffect(() => {
     const checkAuth = () => {
@@ -359,13 +360,17 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
                 {/* </Box> */}
               </MenuItem>
               <Divider /> {/* Pemisah */}
-              <MenuItem onClick={handleInstallClick}>
-                <ListItemIcon>
-                  <DownloadIcon />
-                  &nbsp; {language === "ID" ? "Install App" : "Install App"}
-                </ListItemIcon>
-              </MenuItem>
-              <Divider />
+              {showButton == true && (
+                <>
+                  <MenuItem onClick={handleInstallClick}>
+                    <ListItemIcon>
+                      <DownloadIcon />
+                      &nbsp; {language === "ID" ? "Install App" : "Install App"}
+                    </ListItemIcon>
+                  </MenuItem>
+                  <Divider />
+                </>
+              )}
               {/* Akun */}
               <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
                 <ListItemIcon>
@@ -563,7 +568,8 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
       <Dialog open={updateAvailable}>
         <DialogTitle>Pembaruan Tersedia</DialogTitle>
         <DialogContent>
-          Versi terbaru aplikasi telah tersedia. Silakan muat ulang halaman untuk mendapatkan pembaruan.
+          Versi terbaru aplikasi telah tersedia. Silakan muat ulang halaman
+          untuk mendapatkan pembaruan.
         </DialogContent>
         <DialogActions>
           <Button onClick={() => window.location.reload()} color="primary">
