@@ -101,6 +101,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showButton, setShowButton] = useState(false);
+  const [isForgot, setIsForgot] = useState<boolean>(false);
 
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
@@ -173,6 +174,10 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
     const lang = localStorage.getItem("language");
+    const forgot = localStorage.getItem("isForgot");
+    if (forgot === 'true') {
+      router.push("/change-password");
+    }
     setLanguage(lang || "EN");
     if (!isAuthenticated()) {
       // Redirect hanya di klien
@@ -183,6 +188,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         setRole(user?.role || "user");
         setfullName(user?.fullname);
         setUserId(user?._id);
+
         const fetchData = async () => {
           try {
             const response = await fetchDashboard(token, user?._id);
