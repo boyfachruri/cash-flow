@@ -14,6 +14,7 @@ interface RegisterData {
 }
 
 const API_BASE_URL = process.env.NEXT_LOCAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
+// const API_BASE_URL = "http://localhost:4000/";
 
 export const loginUser = async (loginData: LoginData) => {
   try {
@@ -41,30 +42,26 @@ export const loginUser = async (loginData: LoginData) => {
 
 export const forgotPassword = async (email: string) => {
   try {
-    const token = randomBytes(32).toString("hex");
 
     const data = {
-      email: email,
-      token: token,
+      email: email
     };
 
     const response = await axios.post(
       `${API_BASE_URL}auth/forgot-password`,
       data
     );
-
-    localStorage.setItem("reset_password_token", token);
-    localStorage.setItem("reset_password_email", email);
+    
   } catch (error: any) {
     console.error("Login error:", error.response?.data || error.message);
     throw new Error(error.response?.data?.message);
   }
 };
 
-export const resetPassword = async (email: string, token: string) => {
+export const resetPassword = async (token: string) => {
   try {
     const response = await axios.get(
-      `${API_BASE_URL}auth/confirm-reset-password?token=${token}&email=${email}`
+      `${API_BASE_URL}auth/confirm-reset-password?token=${token}`
     );
   } catch (error: any) {
     throw new Error(error.response?.data?.message);
