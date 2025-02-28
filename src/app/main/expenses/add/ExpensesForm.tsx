@@ -86,6 +86,9 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
     []
   );
 
+  console.log(allCashin, 'allCashin');
+  
+
   const [language, setLanguage] = useState("EN");
   
 
@@ -222,7 +225,7 @@ const ExpensesForm = ({ id, mode }: ExpensesFormInterface) => {
   const handleSubmitCashOut = (data?: ExpensesDetailsFormInterface) => {
     if (!data) {
       const newCashin = {
-        id: crypto.randomUUID(),
+        _id: crypto.randomUUID(),
         description: valueDesc,
         amount: parseFormattedNumber(valueExpensesAmount),
         amountType: amountType,

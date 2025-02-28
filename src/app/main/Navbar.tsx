@@ -175,7 +175,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
     const userData = localStorage.getItem("user");
     const lang = localStorage.getItem("language");
     const forgot = localStorage.getItem("isForgot");
-    if (forgot === 'true') {
+    if (forgot === "true") {
       router.push("/change-password");
     }
     setLanguage(lang || "EN");
@@ -367,16 +367,14 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
               </MenuItem>
               <Divider /> {/* Pemisah */}
               {showButton == true && (
-                <>
-                  <MenuItem onClick={handleInstallClick}>
-                    <ListItemIcon>
-                      <DownloadIcon />
-                      &nbsp; {language === "ID" ? "Install App" : "Install App"}
-                    </ListItemIcon>
-                  </MenuItem>
-                  <Divider />
-                </>
+                <MenuItem onClick={handleInstallClick}>
+                  <ListItemIcon>
+                    <DownloadIcon />
+                    &nbsp; {language === "ID" ? "Install App" : "Install App"}
+                  </ListItemIcon>
+                </MenuItem>
               )}
+              {showButton == true && <Divider />}
               {/* Akun */}
               <MenuItem onClick={() => router.push(`/main/account/${userId}`)}>
                 <ListItemIcon>

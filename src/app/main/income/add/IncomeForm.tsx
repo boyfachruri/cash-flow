@@ -201,7 +201,7 @@ const IncomeForm = ({ id, mode }: IncomeFormInterface) => {
   const handleSubmitCashOut = (data?: IncomeDetailsFormInterface) => {
     if (!data) {
       const newCashin = {
-        id: crypto.randomUUID(),
+        _id: crypto.randomUUID(),
         description: valueDesc,
         amount: parseFormattedNumber(valueIncomeAmount),
         date: selectedDate ? selectedDate.toDate() : new Date(),
