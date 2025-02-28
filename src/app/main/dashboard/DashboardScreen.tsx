@@ -24,33 +24,39 @@ import { isAuthenticated } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { fetchDashboard } from "@/utils/dashboard";
+import { fetchDashboard, fetchDashboardSummary } from "@/utils/dashboard";
 import Loader from "@/components/loader";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import AddCardIcon from '@mui/icons-material/AddCard';
-import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import AddCardIcon from "@mui/icons-material/AddCard";
+import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 
 // Contoh Data Dummy
 const initialData = [
-  { month: "January", income: 5000000, expenses: 3000000 },
-  { month: "February", income: 4500000, expenses: 3200000 },
-  { month: "March", income: 6000000, expenses: 3500000 },
-  { month: "April", income: 5000000, expenses: 3000000 },
-  { month: "May", income: 4500000, expenses: 3200000 },
-  { month: "June", income: 6000000, expenses: 3500000 },
-  { month: "July", income: 5000000, expenses: 3000000 },
-  { month: "August", income: 4500000, expenses: 3200000 },
-  { month: "September", income: 6000000, expenses: 3500000 },
-  { month: "October", income: 5000000, expenses: 3000000 },
-  { month: "November", income: 4500000, expenses: 3200000 },
-  { month: "December  ", income: 6000000, expenses: 3500000 },
+  { id: 1, month: "January" },
+  { id: 2, month: "February" },
+  { id: 3, month: "March" },
+  { id: 4, month: "April" },
+  { id: 5, month: "May" },
+  { id: 6, month: "June" },
+  { id: 7, month: "July" },
+  { id: 8, month: "August" },
+  { id: 9, month: "September" },
+  { id: 10, month: "October" },
+  { id: 11, month: "November" },
+  { id: 12, month: "December  " },
 ];
 
 interface DashboardDataInterface {
   calculateIncome: number;
   calculateExpenses: number;
   calculateBalance: number;
+}
+
+interface summaryInterface {
+  id: number;
+  income: number;
+  expenses: number;
 }
 
 export default function DashboardScreen() {
@@ -62,6 +68,7 @@ export default function DashboardScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState("EN");
+  const [summaryData, setSummaryData] = useState<summaryInterface[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -77,10 +84,15 @@ export default function DashboardScreen() {
         const fetchData = async () => {
           try {
             const response = await fetchDashboard(token, user?._id);
+            const responseSummary = await fetchDashboardSummary(
+              token,
+              user?._id
+            );
             setBalanceData(response?.calculateBalance);
             setIncomeData(response?.calculateIncome);
             setExpensesData(response?.calculateExpenses);
             setWalletData(response?.calculateWallet);
+            setSummaryData(responseSummary);
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
@@ -94,6 +106,13 @@ export default function DashboardScreen() {
   // const [data, setData] = useState(initialData);
 
   // Hitung total pemasukan, pengeluaran, dan saldo bersih
+
+  const handleFindMonth = (id: number) => {
+    
+    const data = initialData?.find((x) => x?.id === id);
+
+    return data?.month
+  };
 
   return isLoading == true ? (
     <Loader />
@@ -112,7 +131,8 @@ export default function DashboardScreen() {
                 color="white"
                 sx={{ display: "flex", alignItems: "center", gap: 1 }}
               >
-                <CreditCardIcon /> {language === "ID" ? "Rekening Utama" : "Main Balance"}
+                <CreditCardIcon />{" "}
+                {language === "ID" ? "Rekening Utama" : "Main Balance"}
               </Typography>
               <Typography variant="h6" color="white">
                 {formatCurrencyIDR(balanceData)}
@@ -143,12 +163,13 @@ export default function DashboardScreen() {
         <Grid item xs={12} md={3}>
           <Card sx={{ backgroundColor: "#1EC612" }}>
             <CardContent>
-            <Typography
+              <Typography
                 variant="h6"
                 color="white"
                 sx={{ display: "flex", alignItems: "center", gap: 1 }}
               >
-               <AddCardIcon /> {language === "ID" ? "Total Pemasukan" : "Total Income"}
+                <AddCardIcon />{" "}
+                {language === "ID" ? "Total Pemasukan" : "Total Income"}
               </Typography>
               <Typography variant="h6" color="white">
                 {formatCurrencyIDR(incomeData)}
@@ -161,12 +182,13 @@ export default function DashboardScreen() {
         <Grid item xs={12} md={3}>
           <Card sx={{ backgroundColor: "#DC1717" }}>
             <CardContent>
-            <Typography
+              <Typography
                 variant="h6"
                 color="white"
                 sx={{ display: "flex", alignItems: "center", gap: 1 }}
               >
-              <ShoppingCartCheckoutIcon />  {language === "ID" ? "Total Pengeluaran" : "Total Expenses"}
+                <ShoppingCartCheckoutIcon />{" "}
+                {language === "ID" ? "Total Pengeluaran" : "Total Expenses"}
               </Typography>
               <Typography variant="h6" color="white">
                 {formatCurrencyIDR(expensesData)}
@@ -177,7 +199,7 @@ export default function DashboardScreen() {
       </Grid>
 
       {/* Grafik */}
-      {/* <Box sx={{ marginTop: 4 }} boxShadow={1}>
+      <Box sx={{ marginTop: 4 }} boxShadow={1}>
         <Box marginLeft={2} paddingTop={2}>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Monthly Financial Summary
@@ -185,7 +207,7 @@ export default function DashboardScreen() {
         </Box>
         <Box marginRight={2} marginLeft={2} marginBottom={2}>
           <List>
-            {initialData?.map((x, i) => (
+            {summaryData?.map((x, i) => (
               <ListItem
                 key={i}
                 alignItems="flex-start"
@@ -200,7 +222,7 @@ export default function DashboardScreen() {
                           variant="body2"
                           fontWeight="bold"
                         >
-                          {x?.month}
+                          {handleFindMonth(x?.id)}
                         </Typography>
                       </Box>
                     </Typography>
@@ -230,7 +252,7 @@ export default function DashboardScreen() {
             ))}
           </List>
         </Box>
-      </Box> */}
+      </Box>
 
       {/* <Box sx={{ marginTop: 4, height: 300 }}>
         <Typography variant="h6" gutterBottom>

@@ -16,3 +16,17 @@ export const fetchDashboard = async (token: string, userId: string) => {
       throw new Error("Failed to fetch user data");
     }
   };
+
+  export const fetchDashboardSummary = async (token: string, userId: string) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}dashboard/summary/${userId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,  // Mengirimkan token Bearer
+        },
+      });
+      return response.data; // Mengembalikan data user
+    } catch (error) {
+    //   console.error("Error fetching user data:", error.response?.data || error.message);
+      throw new Error("Failed to fetch user data");
+    }
+  };
