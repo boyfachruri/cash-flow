@@ -234,7 +234,7 @@ export default function DashboardScreen() {
                     {language === "ID" ? "Total Pemasukan" : "Total Income"}
                   </Typography>
                   <Typography variant="h6" color="white">
-                    {formatCurrencyIDR(incomeData)}
+                    {formatCurrencyIDR(income30Data)}
                   </Typography>
                 </CardContent>
               </Card>
@@ -253,7 +253,7 @@ export default function DashboardScreen() {
                     {language === "ID" ? "Total Pengeluaran" : "Total Expenses"}
                   </Typography>
                   <Typography variant="h6" color="white">
-                    {formatCurrencyIDR(expensesData)}
+                    {formatCurrencyIDR(expenses30Data)}
                   </Typography>
                 </CardContent>
               </Card>
