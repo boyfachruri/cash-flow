@@ -30,6 +30,7 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import AddCardIcon from "@mui/icons-material/AddCard";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
+import InsightsIcon from "@mui/icons-material/Insights";
 
 // Contoh Data Dummy
 const initialData = [
@@ -64,7 +65,10 @@ export default function DashboardScreen() {
   const [balanceData, setBalanceData] = useState(0);
   const [walletData, setWalletData] = useState(0);
   const [incomeData, setIncomeData] = useState(0);
+  const [income30Data, setIncome30Data] = useState(0);
   const [expensesData, setExpensesData] = useState(0);
+  const [expenses30Data, setExpenses30Data] = useState(0);
+  const [expensesPercentage30, setExpensesPercentage30] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState("EN");
@@ -107,6 +111,11 @@ export default function DashboardScreen() {
             setIncomeData(response?.calculateIncome);
             setExpensesData(response?.calculateExpenses);
             setWalletData(response?.calculateWallet);
+            setIncome30Data(response?.calculate30DayIncome);
+            setExpenses30Data(response?.calculate30DayExpenses);
+            setExpensesPercentage30(
+              response?.percentage30DayExpensesFromIncome
+            );
             setSummaryData(responseSummary);
           } catch (err) {
             setError("Failed to fetch dashboard data");
@@ -128,6 +137,29 @@ export default function DashboardScreen() {
     return data?.month;
   };
 
+  const handleDescExpensesPercentage = (perc: number) => {
+    const roundedPercentage = perc.toFixed(2);
+    if (perc <= 50) {
+      const desc =
+        language === "ID"
+          ? `Keuangan bulan ini sehat! Pengeluaran hanya ${roundedPercentage}% dari pemasukan, tetap pertahankan pengelolaan yang baik.`
+          : `This month's finances are healthy! Expenses are only ${roundedPercentage}% of income. Keep up the good financial management.`;
+      return desc;
+    } else if (perc <= 75) {
+      const desc =
+        language === "ID"
+          ? `Pengeluaran bulan ini mencapai ${roundedPercentage}% dari pemasukan. Masih dalam batas wajar, tapi perlu lebih cermat mengatur keuangan.`
+          : `This month's expenses reached ${roundedPercentage}% of income. Still within a reasonable range, but it's good to manage finances more carefully.`;
+      return desc;
+    } else {
+      const desc =
+        language === "ID"
+          ? `Waspada! Pengeluaran bulan ini mencapai ${roundedPercentage}% dari pemasukan. Coba evaluasi dan kurangi pengeluaran agar lebih stabil.`
+          : `Warning! This month's expenses have reached ${roundedPercentage}% of income. Consider evaluating and reducing expenses for better financial stability.`;
+      return desc;
+    }
+  };
+
   return isLoading == true ? (
     <Loader />
   ) : (
@@ -137,7 +169,7 @@ export default function DashboardScreen() {
       </Typography>
       <Grid container spacing={3}>
         {/* Kartu Net Balance */}
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ backgroundColor: "#504BFD" }}>
             <CardContent>
               <Typography
@@ -155,7 +187,7 @@ export default function DashboardScreen() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ backgroundColor: "#904cee" }}>
             <CardContent>
               <Typography
@@ -172,51 +204,104 @@ export default function DashboardScreen() {
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Kartu Total Income */}
-        <Grid item xs={12} md={3}>
-          <Card sx={{ backgroundColor: "#1EC612" }}>
-            <CardContent>
-              <Typography
-                variant="h6"
-                color="white"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
-                <AddCardIcon />{" "}
-                {language === "ID" ? "Total Pemasukan" : "Total Income"}
-              </Typography>
-              <Typography variant="h6" color="white">
-                {formatCurrencyIDR(incomeData)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Kartu Total Expenses */}
-        <Grid item xs={12} md={3}>
-          <Card sx={{ backgroundColor: "#DC1717" }}>
-            <CardContent>
-              <Typography
-                variant="h6"
-                color="white"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
-                <ShoppingCartCheckoutIcon />{" "}
-                {language === "ID" ? "Total Pengeluaran" : "Total Expenses"}
-              </Typography>
-              <Typography variant="h6" color="white">
-                {formatCurrencyIDR(expensesData)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
+
+      <Box sx={{ marginTop: 4 }} boxShadow={1}>
+        <Box marginLeft={2} paddingTop={2}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            {language == "ID"
+              ? "Ringkasan Keuangan 30 Hari"
+              : "30-Day Financial Summary"}
+          </Typography>
+        </Box>
+        <Box
+          marginRight={2}
+          marginLeft={2}
+          marginBottom={2}
+          sx={{ marginTop: 2 }}
+        >
+          <Grid container spacing={3}>
+            {/* Kartu Total Pemasukan */}
+            <Grid item xs={12} md={6}>
+              <Card sx={{ backgroundColor: "#1EC612" }}>
+                <CardContent>
+                  <Typography
+                    variant="h6"
+                    color="white"
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
+                    <AddCardIcon />{" "}
+                    {language === "ID" ? "Total Pemasukan" : "Total Income"}
+                  </Typography>
+                  <Typography variant="h6" color="white">
+                    {formatCurrencyIDR(incomeData)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Kartu Total Pengeluaran */}
+            <Grid item xs={12} md={6}>
+              <Card sx={{ backgroundColor: "#DC1717" }}>
+                <CardContent>
+                  <Typography
+                    variant="h6"
+                    color="white"
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
+                    <ShoppingCartCheckoutIcon />{" "}
+                    {language === "ID" ? "Total Pengeluaran" : "Total Expenses"}
+                  </Typography>
+                  <Typography variant="h6" color="white">
+                    {formatCurrencyIDR(expensesData)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
+        <Box
+          marginRight={2}
+          marginLeft={2}
+          marginBottom={2}
+          sx={{ marginTop: 3, paddingBottom:3 }}
+        >
+          <Card sx={{ backgroundColor: "#FFA500", height: "100%" }}>
+            <CardContent
+              sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+            >
+              <Typography
+                variant="h6"
+                color="white"
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <InsightsIcon />{" "}
+                {language === "ID"
+                  ? "Persentase Pengeluaran"
+                  : "Expense Percentage"}
+              </Typography>
+              <Typography variant="h6" color="white">
+                {expensesPercentage30.toFixed(2)}%
+              </Typography>
+              <Typography
+                variant="body2"
+                color="white"
+                sx={{ marginTop: "auto" }}
+              >
+                {handleDescExpensesPercentage(expensesPercentage30)}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
 
       {/* Grafik */}
       <Box sx={{ marginTop: 4 }} boxShadow={1}>
         <Box marginLeft={2} paddingTop={2}>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
-            {language == 'ID' ? "Ringkasan Keuangan Bulanan" : "Monthly Financial Summary"}
+            {language == "ID"
+              ? "Ringkasan Keuangan Bulanan"
+              : "Monthly Financial Summary"}
           </Typography>
         </Box>
         <Box marginRight={2} marginLeft={2} marginBottom={2}>

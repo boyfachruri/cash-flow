@@ -268,7 +268,7 @@ export default function LoginForm() {
                     <TextField
                       fullWidth
                       color="secondary"
-                      label="Username"
+                      label="Username/Email"
                       name="username"
                       value={formData.username}
                       onChange={handleChange}
