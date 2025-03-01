@@ -70,6 +70,21 @@ export default function DashboardScreen() {
   const [language, setLanguage] = useState("EN");
   const [summaryData, setSummaryData] = useState<summaryInterface[]>([]);
 
+  const initialData = [
+    { id: 1, month: language == "ID" ? "Januari" : "January" },
+    { id: 2, month: language == "ID" ? "Febuari" : "February" },
+    { id: 3, month: language == "ID" ? "Maret" : "March" },
+    { id: 4, month: language == "ID" ? "April" : "April" },
+    { id: 5, month: language == "ID" ? "Mei" : "May" },
+    { id: 6, month: language == "ID" ? "Juni" : "June" },
+    { id: 7, month: language == "ID" ? "Juli" : "July" },
+    { id: 8, month: language == "ID" ? "Agustus" : "August" },
+    { id: 9, month: "September" },
+    { id: 10, month: language == "ID" ? "Oktober" : "October" },
+    { id: 11, month: "November" },
+    { id: 12, month: language == "ID" ? "Desember" : "December" },
+  ];
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const userData = localStorage.getItem("user");
@@ -108,10 +123,9 @@ export default function DashboardScreen() {
   // Hitung total pemasukan, pengeluaran, dan saldo bersih
 
   const handleFindMonth = (id: number) => {
-    
     const data = initialData?.find((x) => x?.id === id);
 
-    return data?.month
+    return data?.month;
   };
 
   return isLoading == true ? (
@@ -202,7 +216,7 @@ export default function DashboardScreen() {
       <Box sx={{ marginTop: 4 }} boxShadow={1}>
         <Box marginLeft={2} paddingTop={2}>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
-            Monthly Financial Summary
+            {language == 'ID' ? "Ringkasan Keuangan Bulanan" : "Monthly Financial Summary"}
           </Typography>
         </Box>
         <Box marginRight={2} marginLeft={2} marginBottom={2}>
