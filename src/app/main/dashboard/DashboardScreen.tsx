@@ -127,6 +127,9 @@ export default function DashboardScreen() {
       } // Jika sudah login, selesai loading
     }
   }, []);
+
+  console.log('testt');
+  
   // const [data, setData] = useState(initialData);
 
   // Hitung total pemasukan, pengeluaran, dan saldo bersih
