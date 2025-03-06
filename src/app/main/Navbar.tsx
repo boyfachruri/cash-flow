@@ -296,7 +296,7 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         <CssBaseline />
         <AppBar position="fixed">
           <Toolbar
-            sx={{ bgcolor: "#904cee", display: "flex", alignItems: "center" }}
+            sx={{ bgcolor: "#904cee", display: "flex", alignItems: "center", backgroundImage: "url('/background3.jpg')" }}
           >
             <IconButton
               color="inherit"
