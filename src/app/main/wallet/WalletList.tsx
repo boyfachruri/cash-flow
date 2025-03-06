@@ -101,9 +101,11 @@ const WalletList = () => {
           setUserId(user?._id);
           const fetchData = async () => {
             try {
-              const response = await fetchWalletList(token, user?._id);
 
-              const responseDashboard = await fetchDashboard(token, user?._id);
+              const [response, responseDashboard] = await Promise.all([
+                            fetchDashboard(token, user?._id),
+                            fetchWalletList(token, user?._id),
+                          ]);
               const formatBalanceAmount = formatNumberToIDR(
                 responseDashboard?.calculateBalance
               );

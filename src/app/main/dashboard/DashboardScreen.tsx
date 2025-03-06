@@ -102,20 +102,18 @@ export default function DashboardScreen() {
         const user = JSON.parse(userData);
         const fetchData = async () => {
           try {
-            const response = await fetchDashboard(token, user?._id);
-            const responseSummary = await fetchDashboardSummary(
-              token,
-              user?._id
-            );
+            const [response, responseSummary] = await Promise.all([
+              fetchDashboard(token, user?._id),
+              fetchDashboardSummary(token, user?._id),
+            ]);
+            
             setBalanceData(response?.calculateBalance);
             setIncomeData(response?.calculateIncome);
             setExpensesData(response?.calculateExpenses);
             setWalletData(response?.calculateWallet);
             setIncome30Data(response?.calculate30DayIncome);
             setExpenses30Data(response?.calculate30DayExpenses);
-            setExpensesPercentage30(
-              response?.percentage30DayExpensesFromIncome
-            );
+            setExpensesPercentage30(response?.percentage30DayExpensesFromIncome);
             setSummaryData(responseSummary);
           } catch (err) {
             setError("Failed to fetch dashboard data");
@@ -123,6 +121,7 @@ export default function DashboardScreen() {
             setIsLoading(false);
           }
         };
+        fetchData();
         fetchData();
       } // Jika sudah login, selesai loading
     }
