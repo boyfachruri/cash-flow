@@ -24,7 +24,7 @@ import { isAuthenticated } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { fetchDashboard, fetchDashboardSummary } from "@/utils/dashboard";
+import { fetchDashboard, fetchDashboardMonth, fetchDashboardSummary } from "@/utils/dashboard";
 import Loader from "@/components/loader";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
@@ -107,9 +107,6 @@ export default function DashboardScreen() {
             setIncomeData(response?.calculateIncome);
             setExpensesData(response?.calculateExpenses);
             setWalletData(response?.calculateWallet);
-            setIncome30Data(response?.calculate30DayIncome);
-            setExpenses30Data(response?.calculate30DayExpenses);
-            setExpensesPercentage30(response?.percentage30DayExpensesFromIncome);
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
@@ -136,6 +133,34 @@ export default function DashboardScreen() {
           try {
             const responseSummary = await fetchDashboardSummary(token, user?._id);
             setSummaryData(responseSummary);
+          } catch (err) {
+            setError("Failed to fetch dashboard data");
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchData();
+      } // Jika sudah login, selesai loading
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const userData = localStorage.getItem("user");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || "EN");
+    if (!isAuthenticated()) {
+      // Redirect hanya di klien
+      router.push("/login");
+    } else {
+      if (userData && token) {
+        const user = JSON.parse(userData);
+        const fetchData = async () => {
+          try {
+            const response = await fetchDashboardMonth(token, user?._id);
+            setIncome30Data(response?.calculate30DayIncome);
+            setExpenses30Data(response?.calculate30DayExpenses);
+            setExpensesPercentage30(response?.percentage30DayExpensesFromIncome);
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
