@@ -102,11 +102,7 @@ export default function DashboardScreen() {
         const user = JSON.parse(userData);
         const fetchData = async () => {
           try {
-            const [response, responseSummary] = await Promise.all([
-              fetchDashboard(token, user?._id),
-              fetchDashboardSummary(token, user?._id),
-            ]);
-            
+            const response = await fetchDashboard(token, user?._id);
             setBalanceData(response?.calculateBalance);
             setIncomeData(response?.calculateIncome);
             setExpensesData(response?.calculateExpenses);
@@ -114,7 +110,6 @@ export default function DashboardScreen() {
             setIncome30Data(response?.calculate30DayIncome);
             setExpenses30Data(response?.calculate30DayExpenses);
             setExpensesPercentage30(response?.percentage30DayExpensesFromIncome);
-            setSummaryData(responseSummary);
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
@@ -122,6 +117,31 @@ export default function DashboardScreen() {
           }
         };
         fetchData();
+      } // Jika sudah login, selesai loading
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const userData = localStorage.getItem("user");
+    const lang = localStorage.getItem("language");
+    setLanguage(lang || "EN");
+    if (!isAuthenticated()) {
+      // Redirect hanya di klien
+      router.push("/login");
+    } else {
+      if (userData && token) {
+        const user = JSON.parse(userData);
+        const fetchData = async () => {
+          try {
+            const responseSummary = await fetchDashboardSummary(token, user?._id);
+            setSummaryData(responseSummary);
+          } catch (err) {
+            setError("Failed to fetch dashboard data");
+          } finally {
+            setIsLoading(false);
+          }
+        };
         fetchData();
       } // Jika sudah login, selesai loading
     }
