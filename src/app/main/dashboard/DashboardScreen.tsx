@@ -160,7 +160,7 @@ export default function DashboardScreen() {
             const response = await fetchDashboardMonth(token, user?._id);
             setIncome30Data(response?.calculate30DayIncome ?? 0);
             setExpenses30Data(response?.calculate30DayExpenses ?? 0);
-            setExpensesPercentage30(response?.percentage30DayExpensesFromIncome ?? 0);
+            setExpensesPercentage30(response?.percentage30DayExpensesFromIncome ?? 100);
           } catch (err) {
             setError("Failed to fetch dashboard data");
           } finally {
