@@ -30,6 +30,7 @@ const Search: React.FC<SearchProps> = ({
       sx={{ borderRadius: "10px" }}
       fullWidth
       variant="outlined"
+      color="secondary"
       size="small"
       placeholder={placeholder}
       value={query}

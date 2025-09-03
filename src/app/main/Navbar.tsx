@@ -45,6 +45,7 @@ import { formatCurrencyIDR } from "@/components/functions/IDRFormatter";
 import Loader from "@/components/loader";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import DownloadIcon from "@mui/icons-material/Download";
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 const drawerWidth = 240;
 
@@ -139,6 +140,12 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
       name: language === "ID" ? "Pengeluaran" : "Expenses",
       link: "/main/expenses",
       icons: <ShoppingCartCheckoutIcon />,
+    },
+    {
+      id: 5,
+      name: language === "ID" ? "Hutang" : "Debts",
+      link: "/main/debts",
+      icons: <ReceiptLongIcon />,
     },
   ];
 
@@ -296,7 +303,12 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
         <CssBaseline />
         <AppBar position="fixed">
           <Toolbar
-            sx={{ bgcolor: "#904cee", display: "flex", alignItems: "center", backgroundImage: "url('/background3.jpg')" }}
+            sx={{
+              bgcolor: "#904cee",
+              display: "flex",
+              alignItems: "center",
+              backgroundImage: "url('/background3.jpg')",
+            }}
           >
             <IconButton
               color="inherit"
