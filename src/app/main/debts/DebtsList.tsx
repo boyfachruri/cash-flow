@@ -361,19 +361,25 @@ const DebtsList = () => {
                           {language === "ID" ? "Lihat Data" : "View"}
                         </Typography>
                       </MenuItem>
-                      <MenuItem onClick={() => handlePayment(x)}>
-                        <Typography component="span" variant="body2">
-                          {language === "ID" ? "Bayar" : "Payment"}
-                        </Typography>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => handleDeleteClick(x)}
-                        sx={{ color: "error.main" }}
-                      >
-                        <Typography component="span" variant="body2">
-                          {language === "ID" ? "Hapus" : "Delete"}
-                        </Typography>
-                      </MenuItem>
+
+                      {tabValue === "unpaid" && (
+                        <MenuItem onClick={() => handlePayment(x)}>
+                          <Typography component="span" variant="body2">
+                            {language === "ID" ? "Bayar" : "Payment"}
+                          </Typography>
+                        </MenuItem>
+                      )}
+
+                      {tabValue === "unpaid" && (
+                        <MenuItem
+                          onClick={() => handleDeleteClick(x)}
+                          sx={{ color: "error.main" }}
+                        >
+                          <Typography component="span" variant="body2">
+                            {language === "ID" ? "Hapus" : "Delete"}
+                          </Typography>
+                        </MenuItem>
+                      )}
                     </Menu>
                   </>
                 }
